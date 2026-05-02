@@ -27,3 +27,29 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+
+/* Badge variants */
+.badge { @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium; }
+.badge.on-track  { background: #14532d30; color: #4ade80; }
+.badge.at-risk   { background: #7c2d1230; color: #fb923c; }
+.badge.off-track { background: #7f1d1d30; color: #f87171; }
+.badge.completed { background: #1e3a5f30; color: #60a5fa; }
+.badge.todo      { background: var(--bg3);  color: var(--text3); }
+.badge.inprog    { background: var(--accent-10); color: var(--accent); }
+.badge.high      { background: #7f1d1d30; color: #f87171; }
+.badge.medium    { background: #78350f30; color: #fbbf24; }
+.badge.low       { background: #14532d30; color: #4ade80; }
+
+/* Cards */
+.card            { @apply rounded-[var(--radius-lg)] overflow-hidden; background: var(--bg2); border: 1px solid var(--border); }
+.card-header     { @apply flex items-center justify-between px-4 py-3.5; border-bottom: 1px solid var(--border); }
+.card-title      { @apply text-[13px] font-medium; color: var(--text); }
+.card-body       { @apply p-4; }
+
+/* Buttons */
+.btn             { @apply inline-flex items-center gap-1.5 px-[14px] py-[6px] rounded-[var(--radius)] text-[13px] font-medium cursor-pointer border-none transition-all; font-family: inherit; }
+.btn-primary     { background: var(--accent); color: white; }
+.btn-primary:hover { opacity: .9; }
+.btn-ghost       { background: transparent; color: var(--text2); border: 1px solid var(--border); }
+.btn-ghost:hover { background: var(--bg3); color: var(--text); }

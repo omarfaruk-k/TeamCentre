@@ -17,11 +17,13 @@ model User {
   avatarUrl    String?
   createdAt    DateTime @default(now())
 
-  memberships  WorkspaceMember[]
-  ownedGoals   Goal[]
-  actionItems  ActionItem[]      @relation("AssignedItems")
-  comments     Comment[]
+  memberships   WorkspaceMember[]
+  ownedGoals    Goal[]
+  actionItems   ActionItem[]      @relation("AssignedItems")
+  comments      Comment[]
   notifications Notification[]
+  goalUpdates   GoalUpdate[]
+  announcements Announcement[]
 }
 
 model Workspace {
@@ -38,9 +40,9 @@ model Workspace {
 }
 
 model WorkspaceMember {
-  id          String   @id @default(uuid())
-  role        Role     @default(MEMBER)
-  joinedAt    DateTime @default(now())
+  id       String   @id @default(uuid())
+  role     Role     @default(MEMBER)
+  joinedAt DateTime @default(now())
 
   userId      String
   workspaceId String
@@ -65,8 +67,8 @@ model Goal {
 
   ownerId     String
   workspaceId String
-  owner       User       @relation(fields: [ownerId], references: [id])
-  workspace   Workspace  @relation(fields: [workspaceId], references: [id])
+  owner       User      @relation(fields: [ownerId], references: [id])
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
 
   milestones  Milestone[]
   updates     GoalUpdate[]
@@ -81,42 +83,46 @@ enum GoalStatus {
 }
 
 model Milestone {
-  id         String   @id @default(uuid())
-  title      String
-  progress   Int      @default(0)  // 0–100
-  completed  Boolean  @default(false)
-  createdAt  DateTime @default(now())
+  id        String   @id @default(uuid())
+  title     String
+  progress  Int      @default(0) // 0–100
+  completed Boolean  @default(false)
+  createdAt DateTime @default(now())
 
-  goalId     String
-  goal       Goal     @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  goalId String
+  goal   Goal   @relation(fields: [goalId], references: [id], onDelete: Cascade)
 }
 
 model GoalUpdate {
   id        String   @id @default(uuid())
   content   String
   createdAt DateTime @default(now())
-
   goalId    String
+  authorId  String
   goal      Goal     @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  author    User     @relation(fields: [authorId], references: [id])
 }
 
 model Announcement {
   id        String   @id @default(uuid())
   title     String
-  content   String   // rich text (HTML string)
+  content   String // rich text (HTML string)
   pinned    Boolean  @default(false)
   createdAt DateTime @default(now())
 
   workspaceId String
-  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  authorId    String
 
-  reactions   Reaction[]
-  comments    Comment[]
+  workspace Workspace @relation(fields: [workspaceId], references: [id])
+  author    User      @relation(fields: [authorId], references: [id])
+
+  reactions Reaction[]
+  comments  Comment[]
 }
 
 model Reaction {
-  id             String @id @default(uuid())
-  emoji          String
+  id    String @id @default(uuid())
+  emoji String
 
   userId         String
   announcementId String
@@ -137,19 +143,19 @@ model Comment {
 }
 
 model ActionItem {
-  id          String           @id @default(uuid())
-  title       String
-  priority    Priority         @default(MEDIUM)
-  status      ActionItemStatus @default(TODO)
-  dueDate     DateTime?
-  createdAt   DateTime         @default(now())
+  id        String           @id @default(uuid())
+  title     String
+  priority  Priority         @default(MEDIUM)
+  status    ActionItemStatus @default(TODO)
+  dueDate   DateTime?
+  createdAt DateTime         @default(now())
 
   assigneeId  String?
   workspaceId String
   goalId      String?
-  assignee    User?      @relation("AssignedItems", fields: [assigneeId], references: [id])
-  workspace   Workspace  @relation(fields: [workspaceId], references: [id])
-  goal        Goal?      @relation(fields: [goalId], references: [id])
+  assignee    User?     @relation("AssignedItems", fields: [assigneeId], references: [id])
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  goal        Goal?     @relation(fields: [goalId], references: [id])
 }
 
 enum Priority {
@@ -170,6 +176,6 @@ model Notification {
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
 
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 }
