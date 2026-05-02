@@ -29,15 +29,17 @@ export default function Sidebar() {
       className="w-56 shrink-0 flex flex-col h-full"
       style={{
         backgroundColor: 'var(--bg-panel)',
-        
+        borderLeft: '3px solid var(--accent)',
       }}
     >
       {/* App name — top left */}
       <div className="px-4 h-12 flex items-center shrink-0"
         style={{ borderBottom: '1px solid var(--border)' }}>
-        <span className="font-bold text-base tracking-tight" style={{ color: 'var(--text-primary)' }}>
-          Team Hub
-        </span>
+<Link href="/">
+  <span className="font-bold text-base tracking-tight" style={{ color: 'var(--text-primary)' }}>
+    Team Hub
+  </span>
+</Link>
       </div>
 
       {/* Nav */}
@@ -56,9 +58,23 @@ export default function Sidebar() {
               } : {
                 color: 'var(--text-muted)',
               }}
+              onMouseEnter={e => {
+  if (!isActive) {
+    e.currentTarget.style.backgroundColor = accent + '10'
+    e.currentTarget.style.color = accent
+  }
+}}
+onMouseLeave={e => {
+  if (!isActive) {
+    e.currentTarget.style.backgroundColor = 'transparent'
+    e.currentTarget.style.color = 'var(--text-muted)'
+  }
+}}
             >
               <Icon size={15} strokeWidth={isActive ? 2.5 : 1.8} />
               {item.label}
+
+
             </Link>
           )
         })}

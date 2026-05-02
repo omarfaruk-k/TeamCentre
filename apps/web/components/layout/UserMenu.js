@@ -5,6 +5,7 @@ import { useAuthStore } from '../../stores/authStore'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
 import { Image, Pencil, Sun, Moon, LogOut } from 'lucide-react'
 import api from '../../lib/api'
+import { ChevronRight } from 'lucide-react'
 
 export default function UserMenu() {
   const { user, logout } = useAuthStore()
@@ -102,7 +103,7 @@ useEffect(() => {
           <p className="text-sm font-medium text-[var(--text)] dark:text-[var(--text)] truncate">{user?.name}</p>
           <p className="text-xs text-[var(--text2)] truncate">{user?.email}</p>
         </div>
-        <span className="text-[var(--text2)] text-xs">▾</span>
+        <ChevronRight size={14} />
       </button>
 
       {/* Popup card */}
