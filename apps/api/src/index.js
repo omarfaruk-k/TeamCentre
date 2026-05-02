@@ -2,6 +2,9 @@ import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import dotenv from 'dotenv'
+import { createServer } from 'http'
+import { Server } from 'socket.io'
+import { initSocket } from './sockets/workspaceSocket.js'
 import authRouter from './routes/auth.js'
 import workspaceRouter from './routes/workspaces.js'
 import goalRouter from './routes/goals.js'
@@ -12,9 +15,19 @@ import actionItemRouter from './routes/actionItems.js'
 dotenv.config()
 
 const app = express()
+const httpServer = createServer(app)
+const io = new Server(httpServer, {
+  cors: { origin: process.env.CLIENT_URL, credentials: true }
+})
+
+initSocket(io)
+
 app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }))
 app.use(express.json())
 app.use(cookieParser())
+
+// Pass io to every request
+app.use((req, res, next) => { req.io = io; next() })
 
 app.get('/health', (req, res) => res.json({ ok: true }))
 app.use('/auth', authRouter)
@@ -22,9 +35,7 @@ app.use('/workspaces', workspaceRouter)
 app.use('/workspaces/:workspaceId/goals', goalRouter)
 app.use('/workspaces/:workspaceId/goals/:goalId/milestones', milestoneRouter)
 app.use('/workspaces/:workspaceId/announcements', announcementRouter)
-app.use('/api/workspaces/:workspaceId/action-items', actionItemRouter)
 app.use('/workspaces/:workspaceId/action-items', actionItemRouter)
 
-
 const PORT = process.env.PORT || 4000
-app.listen(PORT, () => console.log(`API running on port ${PORT}`))
+httpServer.listen(PORT, () => console.log(`API running on port ${PORT}`))

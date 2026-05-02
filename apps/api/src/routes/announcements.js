@@ -34,6 +34,7 @@ const announcement = await prisma.announcement.create({
       comments: []
     }
   })
+  req.io.to(`workspace:${req.params.workspaceId}`).emit('announcement:created', { announcement })
   res.status(201).json(announcement)
 })
 
@@ -44,6 +45,7 @@ router.patch('/:announcementId/pin', authenticate, requireRole('ADMIN'), async (
     where: { id: req.params.announcementId },
     data: { pinned: !current.pinned }
   })
+  req.io.to(`workspace:${req.params.workspaceId}`).emit('announcement:pinned', { announcementId: req.params.announcementId, pinned: updated.pinned })
   res.json(updated)
 })
 
@@ -68,6 +70,7 @@ router.post('/:announcementId/reactions', authenticate, async (req, res) => {
     })
   }
   const reactions = await prisma.reaction.findMany({ where: { announcementId } })
+  req.io.to(`workspace:${req.params.workspaceId}`).emit('reaction:updated', { announcementId, reactions })
   res.json(reactions)
 })
 
@@ -80,6 +83,7 @@ const comment = await prisma.comment.create({
   include: { user: { select: { id: true, name: true, avatarUrl: true } } }
 })
   res.status(201).json(comment)
+  req.io.to(`workspace:${req.params.workspaceId}`).emit('comment:created', { announcementId: req.params.announcementId, comment })
 })
 
 export default router

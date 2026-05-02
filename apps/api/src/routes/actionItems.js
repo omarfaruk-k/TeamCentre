@@ -58,6 +58,7 @@ router.patch('/:itemId', authenticate, async (req, res) => {
             }
     
   })
+  req.io.to(`workspace:${req.params.workspaceId}`).emit('actionItem:updated', { actionItem: item })
   res.json(item)
 })
 

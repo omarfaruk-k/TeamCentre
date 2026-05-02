@@ -78,6 +78,7 @@ router.post('/:goalId/updates', authenticate, async (req, res) => {
     data: { content, goalId: req.params.goalId, authorId: req.user.id },
     include: { author: { select: { id: true, name: true, avatarUrl: true } } }
   })
+  req.io.to(`workspace:${req.params.workspaceId}`).emit('goal:updated', { goal })
   res.status(201).json(update)
 })
 

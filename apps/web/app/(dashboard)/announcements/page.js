@@ -102,7 +102,7 @@ export default function AnnouncementsPage() {
             <div className="border-t border-slate-100 dark:border-slate-700 pt-3 space-y-2">
               {a.comments?.map((c) => (
                 <div key={c.id} className="text-sm">
-                  <span className="font-medium">{c.author?.name}: </span>
+                  <span className="font-medium">{c.user?.name}: </span>
                   <span className="text-slate-500">{c.content}</span>
                 </div>
               ))}

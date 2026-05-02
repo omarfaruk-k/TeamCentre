@@ -6,12 +6,14 @@ import { useWorkspaceStore } from '../../stores/workspaceStore'
 import { useWorkspaceAccent } from '../../hooks/useWorkspaceAccent'
 import Sidebar from '../../components/layout/Sidebar'
 import TopNav from '../../components/layout/TopNav'
+import { useSocket } from '../../hooks/useSocket'
 
 export default function DashboardLayout({ children }) {
   const { user, loading, fetchMe } = useAuthStore()
   const { fetchWorkspaces, setActive, workspaces, active } = useWorkspaceStore()
   const router = useRouter()
   useWorkspaceAccent()
+  useSocket()
 
   useEffect(() => { fetchMe() }, [])
 

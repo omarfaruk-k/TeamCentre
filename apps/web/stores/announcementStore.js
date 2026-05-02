@@ -52,12 +52,8 @@ export const useAnnouncementStore = create((set, get) => ({
     }
   },
 
-  addComment: async (workspaceId, announcementId, content) => {
-    const res = await api.post(`/workspaces/${workspaceId}/announcements/${announcementId}/comments`, { content })
-    set((s) => ({
-      announcements: s.announcements.map((a) =>
-        a.id === announcementId ? { ...a, comments: [...(a.comments || []), res.data] } : a
-      )
-    }))
-  }
+addComment: async (workspaceId, announcementId, content) => {
+  await api.post(`/workspaces/${workspaceId}/announcements/${announcementId}/comments`, { content })
+  
+}
 }))
