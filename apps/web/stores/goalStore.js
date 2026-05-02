@@ -41,18 +41,26 @@ export const useGoalStore = create((set, get) => ({
     }))
   },
 
-  toggleMilestone: async (workspaceId, goalId, milestoneId, completed) => {
-    const prev = get().active
-    set((s) => ({
-      active: s.active ? {
-        ...s.active,
-        milestones: s.active.milestones.map((m) => m.id === milestoneId ? { ...m, completed } : m)
-      } : s.active
-    }))
-    try {
-      await api.patch(`/workspaces/${workspaceId}/goals/${goalId}/milestones/${milestoneId}`, { completed })
-    } catch {
-      set({ active: prev })
-    }
+toggleMilestone: async (workspaceId, goalId, milestoneId, completed) => {
+  const prev = get().active
+  // Optimistic update for milestone only
+  set((s) => ({
+    active: s.active ? {
+      ...s.active,
+      milestones: s.active.milestones.map((m) =>
+        m.id === milestoneId ? { ...m, completed } : m
+      )
+    } : s.active
+  }))
+  try {
+    const res = await api.patch(
+      `/workspaces/${workspaceId}/goals/${goalId}/milestones/${milestoneId}`,
+      { completed }
+    )
+    // Sync full goal including recalculated progress
+    set({ active: res.data })
+  } catch {
+    set({ active: prev })
   }
+}
 }))

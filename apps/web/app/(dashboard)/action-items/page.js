@@ -13,15 +13,27 @@ const COLUMNS = [
 ]
 
 const PRIORITY_COLORS = {
-  LOW: 'bg-slate-100 text-slate-500 dark:bg-slate-700',
-  MEDIUM: 'bg-amber-100 text-amber-700',
-  HIGH: 'bg-red-100 text-red-600',
+  LOW:    'bg-[var(--bg4)] text-[var(--text2)] border border-[var(--border2)]',
+  MEDIUM: 'bg-[#78350f25] text-amber-400 border border-[#78350f40]',
+  HIGH:   'bg-[#7f1d1d25] text-red-400 border border-[#7f1d1d40]',
 }
 
 const STATUS_COLORS = {
-  TODO: 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300',
-  IN_PROGRESS: 'bg-blue-100 text-blue-700',
-  DONE: 'bg-emerald-100 text-emerald-700',
+  TODO:        'bg-[var(--bg4)] text-[var(--text2)] border border-[var(--border2)]',
+  IN_PROGRESS: 'bg-[#1e3a5f25] text-blue-400 border border-[#1e3a5f40]',
+  DONE:        'bg-[#14532d25] text-emerald-400 border border-[#14532d40]',
+}
+
+const COLUMN_HEADER_COLORS = {
+  TODO:        'text-[var(--text2)]',
+  IN_PROGRESS: 'text-blue-400',
+  DONE:        'text-emerald-400',
+}
+
+const COLUMN_COUNT_COLORS = {
+  TODO:        'bg-[var(--bg4)] text-[var(--text2)] border border-[var(--border)]',
+  IN_PROGRESS: 'bg-[#1e3a5f25] text-blue-400 border border-[#1e3a5f40]',
+  DONE:        'bg-[#14532d25] text-emerald-400 border border-[#14532d40]',
 }
 
 export default function ActionItemsPage() {
@@ -29,7 +41,7 @@ export default function ActionItemsPage() {
   const { items, fetchItems, createItem, moveItem, deleteItem } = useActionItemStore()
   const { user } = useAuthStore()
   const [showForm, setShowForm] = useState(false)
-  const [view, setView] = useState('board') // 'board' | 'list'
+  const [view, setView] = useState('board')
   const accent = workspace?.accentColor || '#7C3AED'
 
   useEffect(() => {
@@ -48,23 +60,27 @@ export default function ActionItemsPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Action Items</h1>
+        <h1 className="text-2xl font-bold text-[var(--text)]">Action Items</h1>
         <div className="flex items-center gap-2">
-          {/* View toggle */}
-          <div className="flex rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden text-sm">
+          <div className="flex rounded-lg border border-[var(--border)] overflow-hidden text-sm">
             <button
               onClick={() => setView('board')}
-              className={`px-3 py-1.5 ${view === 'board' ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800'}`}>
+              className={`px-3 py-1.5 transition-colors ${view === 'board'
+                ? 'bg-[var(--bg3)] text-[var(--text)]'
+                : 'text-[var(--text2)] hover:bg-[var(--bg3)]'}`}>
               Board
             </button>
             <button
               onClick={() => setView('list')}
-              className={`px-3 py-1.5 ${view === 'list' ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800'}`}>
+              className={`px-3 py-1.5 transition-colors ${view === 'list'
+                ? 'bg-[var(--bg3)] text-[var(--text)]'
+                : 'text-[var(--text2)] hover:bg-[var(--bg3)]'}`}>
               List
             </button>
           </div>
-          <button onClick={() => setShowForm(true)}
-            className="px-4 py-2 rounded-lg text-white text-sm font-medium"
+          <button
+            onClick={() => setShowForm(true)}
+            className="px-4 py-2 rounded-lg text-white text-sm font-medium transition-opacity hover:opacity-90"
             style={{ backgroundColor: accent }}>
             + New Item
           </button>
@@ -76,11 +92,11 @@ export default function ActionItemsPage() {
           <div className="grid grid-cols-3 gap-4">
             {COLUMNS.map((col) => (
               <div key={col.id} className="flex flex-col">
-                <div className="flex items-center justify-between mb-3">
-                  <h2 className="font-semibold text-sm text-slate-600 dark:text-slate-400 uppercase tracking-wide">
+                <div className="flex items-center justify-between mb-3 px-1">
+                  <h2 className={`font-semibold text-xs uppercase tracking-widest ${COLUMN_HEADER_COLORS[col.id]}`}>
                     {col.label}
                   </h2>
-                  <span className="text-xs bg-slate-100 dark:bg-slate-700 text-slate-500 px-2 py-0.5 rounded-full">
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${COLUMN_COUNT_COLORS[col.id]}`}>
                     {columnItems(col.id).length}
                   </span>
                 </div>
@@ -91,8 +107,8 @@ export default function ActionItemsPage() {
                       {...provided.droppableProps}
                       className={`flex-1 min-h-32 rounded-xl p-2 space-y-2 transition-colors ${
                         snapshot.isDraggingOver
-                          ? 'bg-slate-100 dark:bg-slate-700/50'
-                          : 'bg-slate-50 dark:bg-slate-800/50'
+                          ? 'bg-[var(--bg3)]'
+                          : 'bg-[var(--bg2)]'
                       }`}
                     >
                       {columnItems(col.id).map((item, index) => (
@@ -102,13 +118,13 @@ export default function ActionItemsPage() {
                               ref={provided.innerRef}
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
-                              className={`bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-3 shadow-sm ${
-                                snapshot.isDragging ? 'shadow-lg rotate-1' : ''
+                              className={`bg-[var(--bg3)] rounded-lg border border-[var(--border)] p-3 transition-shadow ${
+                                snapshot.isDragging ? 'shadow-lg rotate-1 border-[var(--border2)]' : ''
                               }`}
                             >
-                              <p className="text-sm font-medium mb-2">{item.title}</p>
+                              <p className="text-sm font-medium text-[var(--text)] mb-2">{item.title}</p>
                               {item.goal && (
-                                <p className="text-xs text-slate-400 mb-2">🎯 {item.goal.title}</p>
+                                <p className="text-xs text-[var(--text3)] mb-2 truncate">⬡ {item.goal.title}</p>
                               )}
                               <div className="flex items-center justify-between">
                                 <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${PRIORITY_COLORS[item.priority]}`}>
@@ -117,21 +133,23 @@ export default function ActionItemsPage() {
                                 <div className="flex items-center gap-2">
                                   {item.assignee && (
                                     <div className="flex items-center gap-1">
-                                      <div className="w-5 h-5 rounded-full text-white text-xs flex items-center justify-center font-bold"
+                                      <div
+                                        className="w-5 h-5 rounded-full text-white text-xs flex items-center justify-center font-bold"
                                         style={{ backgroundColor: accent }}>
                                         {item.assignee.name[0].toUpperCase()}
                                       </div>
-                                      <span className="text-xs text-slate-400">{item.assignee.name}</span>
+                                      <span className="text-xs text-[var(--text2)]">{item.assignee.name}</span>
                                     </div>
                                   )}
                                   {item.dueDate && (
-                                    <span className="text-xs text-slate-400">
+                                    <span className="text-xs text-[var(--text3)]">
                                       {new Date(item.dueDate).toLocaleDateString()}
                                     </span>
                                   )}
                                   {role === 'ADMIN' && (
-                                    <button onClick={() => deleteItem(workspace.id, item.id)}
-                                      className="text-slate-300 hover:text-red-400 text-xs">✕</button>
+                                    <button
+                                      onClick={() => deleteItem(workspace.id, item.id)}
+                                      className="text-[var(--text3)] hover:text-red-400 text-xs transition-colors">✕</button>
                                   )}
                                 </div>
                               </div>
@@ -148,27 +166,26 @@ export default function ActionItemsPage() {
           </div>
         </DragDropContext>
       ) : (
-        /* List View */
-        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <div className="bg-[var(--bg2)] rounded-xl border border-[var(--border)] overflow-hidden">
           {items.length === 0 ? (
-            <div className="p-12 text-center text-slate-400">No action items yet.</div>
+            <div className="p-12 text-center text-[var(--text2)]">No action items yet.</div>
           ) : (
             <table className="w-full text-sm">
-              <thead className="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
+              <thead className="border-b border-[var(--border)] bg-[var(--bg)]">
                 <tr>
-                  <th className="text-left px-4 py-3 font-medium">Title</th>
-                  <th className="text-left px-4 py-3 font-medium">Status</th>
-                  <th className="text-left px-4 py-3 font-medium">Priority</th>
-                  <th className="text-left px-4 py-3 font-medium">Assignee</th>
-                  <th className="text-left px-4 py-3 font-medium">Linked Goal</th>
-                  <th className="text-left px-4 py-3 font-medium">Due</th>
-                  {role === 'ADMIN' && <th className="px-4 py-3" />}
+                  {['Title', 'Status', 'Priority', 'Assignee', 'Linked Goal', 'Due', role === 'ADMIN' ? '' : null]
+                    .filter(Boolean)
+                    .map((h) => (
+                      <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-[var(--text2)] uppercase tracking-wider">
+                        {h}
+                      </th>
+                    ))}
                 </tr>
               </thead>
               <tbody>
                 {items.map((item) => (
-                  <tr key={item.id} className="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                    <td className="px-4 py-3 font-medium">{item.title}</td>
+                  <tr key={item.id} className="border-b border-[var(--border)] hover:bg-[var(--bg3)] transition-colors">
+                    <td className="px-4 py-3 font-medium text-[var(--text)]">{item.title}</td>
                     <td className="px-4 py-3">
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[item.status]}`}>
                         {item.status.replace('_', ' ')}
@@ -182,24 +199,26 @@ export default function ActionItemsPage() {
                     <td className="px-4 py-3">
                       {item.assignee ? (
                         <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-full text-white text-xs flex items-center justify-center font-bold"
+                          <div
+                            className="w-6 h-6 rounded-full text-white text-xs flex items-center justify-center font-bold"
                             style={{ backgroundColor: accent }}>
                             {item.assignee.name[0].toUpperCase()}
                           </div>
-                          <span className="text-slate-600 dark:text-slate-300">{item.assignee.name}</span>
+                          <span className="text-[var(--text2)]">{item.assignee.name}</span>
                         </div>
-                      ) : <span className="text-slate-400">—</span>}
+                      ) : <span className="text-[var(--text3)]">—</span>}
                     </td>
-                    <td className="px-4 py-3 text-slate-500">
-                      {item.goal ? `🎯 ${item.goal.title}` : '—'}
+                    <td className="px-4 py-3 text-[var(--text2)]">
+                      {item.goal ? `⬡ ${item.goal.title}` : <span className="text-[var(--text3)]">—</span>}
                     </td>
-                    <td className="px-4 py-3 text-slate-500">
-                      {item.dueDate ? new Date(item.dueDate).toLocaleDateString() : '—'}
+                    <td className="px-4 py-3 text-[var(--text2)]">
+                      {item.dueDate ? new Date(item.dueDate).toLocaleDateString() : <span className="text-[var(--text3)]">—</span>}
                     </td>
                     {role === 'ADMIN' && (
                       <td className="px-4 py-3">
-                        <button onClick={() => deleteItem(workspace.id, item.id)}
-                          className="text-slate-300 hover:text-red-400 text-xs">✕</button>
+                        <button
+                          onClick={() => deleteItem(workspace.id, item.id)}
+                          className="text-[var(--text3)] hover:text-red-400 text-xs transition-colors">✕</button>
                       </td>
                     )}
                   </tr>
@@ -246,41 +265,50 @@ function ActionItemForm({ workspaceId, accent, onClose, onCreate }) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-slate-800 rounded-xl p-6 w-full max-w-md shadow-xl">
-        <h2 className="text-lg font-bold mb-4">New Action Item</h2>
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="bg-[var(--bg2)] rounded-xl p-6 w-full max-w-md border border-[var(--border)]">
+        <h2 className="text-lg font-bold text-[var(--text)] mb-4">New Action Item</h2>
         <form onSubmit={handleSubmit} className="space-y-3">
-          <input required placeholder="Title" value={form.title}
+          <input
+            required placeholder="Title" value={form.title}
             onChange={(e) => setForm({ ...form, title: e.target.value })}
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 bg-transparent outline-none text-sm" />
-          <select value={form.priority} onChange={(e) => setForm({ ...form, priority: e.target.value })}
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 bg-white dark:bg-slate-800 outline-none text-sm">
+            className="w-full border border-[var(--border)] rounded-lg px-3 py-2 bg-[var(--bg3)] text-[var(--text)] outline-none text-sm placeholder:text-[var(--text3)]" />
+          <select
+            value={form.priority} onChange={(e) => setForm({ ...form, priority: e.target.value })}
+            className="w-full border border-[var(--border)] rounded-lg px-3 py-2 bg-[var(--bg3)] text-[var(--text)] outline-none text-sm">
             <option value="LOW">Low Priority</option>
             <option value="MEDIUM">Medium Priority</option>
             <option value="HIGH">High Priority</option>
           </select>
-          <select value={form.assigneeId} onChange={(e) => setForm({ ...form, assigneeId: e.target.value })}
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 bg-white dark:bg-slate-800 outline-none text-sm">
+          <select
+            value={form.assigneeId} onChange={(e) => setForm({ ...form, assigneeId: e.target.value })}
+            className="w-full border border-[var(--border)] rounded-lg px-3 py-2 bg-[var(--bg3)] text-[var(--text)] outline-none text-sm">
             <option value="">No assignee</option>
             {members.map((m) => (
               <option key={m.user.id} value={m.user.id}>{m.user.name}</option>
             ))}
           </select>
-          <select value={form.goalId} onChange={(e) => setForm({ ...form, goalId: e.target.value })}
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 bg-white dark:bg-slate-800 outline-none text-sm">
+          <select
+            value={form.goalId} onChange={(e) => setForm({ ...form, goalId: e.target.value })}
+            className="w-full border border-[var(--border)] rounded-lg px-3 py-2 bg-[var(--bg3)] text-[var(--text)] outline-none text-sm">
             <option value="">No linked goal</option>
             {goals.map((g) => (
               <option key={g.id} value={g.id}>{g.title}</option>
             ))}
           </select>
-          <input type="date" value={form.dueDate}
+          <input
+            type="date" value={form.dueDate}
             onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 bg-transparent outline-none text-sm" />
+            className="w-full border border-[var(--border)] rounded-lg px-3 py-2 bg-[var(--bg3)] text-[var(--text)] outline-none text-sm" />
           <div className="flex gap-2 justify-end pt-2">
-            <button type="button" onClick={onClose}
-              className="px-4 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700">Cancel</button>
-            <button type="submit" disabled={loading}
-              className="px-4 py-2 text-sm rounded-lg text-white disabled:opacity-50"
+            <button
+              type="button" onClick={onClose}
+              className="px-4 py-2 text-sm rounded-lg border border-[var(--border)] text-[var(--text2)] hover:bg-[var(--bg3)] transition-colors">
+              Cancel
+            </button>
+            <button
+              type="submit" disabled={loading}
+              className="px-4 py-2 text-sm rounded-lg text-white disabled:opacity-50 transition-opacity hover:opacity-90"
               style={{ backgroundColor: accent }}>
               {loading ? 'Saving...' : 'Create'}
             </button>

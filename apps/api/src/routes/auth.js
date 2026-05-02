@@ -1,7 +1,15 @@
 import { Router } from 'express'
 import bcrypt from 'bcrypt'
 import prisma from '../lib/prisma.js'
-import { signAccess, signRefresh, verifyRefresh } from '../lib/jwt.js'
+import { signAccess, signRefresh, verifyAccess, verifyRefresh } from '../lib/jwt.js'
+
+import { v2 as cloudinary } from 'cloudinary'
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+})
 
 const router = Router()
 
@@ -62,7 +70,7 @@ router.get('/me', async (req, res) => {
   const token = req.cookies?.accessToken
   if (!token) return res.status(401).json({ error: 'Not authenticated' })
   try {
-    const { verifyAccess } = await import('../lib/jwt.js')
+    // const { verifyAccess } = await import('../lib/jwt.js')
     const payload = verifyAccess(token)
     const user = await prisma.user.findUnique({ where: { id: payload.id } })
     res.json({ id: user.id, name: user.name, email: user.email, avatarUrl: user.avatarUrl })
@@ -75,7 +83,7 @@ router.patch('/me', async (req, res) => {
   const token = req.cookies?.accessToken
   if (!token) return res.status(401).json({ error: 'Not authenticated' })
   try {
-    const { verifyAccess } = await import('../lib/jwt.js')
+    // const { verifyAccess } = await import('../lib/jwt.js')
     const payload = verifyAccess(token)
     const { name, avatarUrl } = req.body
     const user = await prisma.user.update({
@@ -85,6 +93,37 @@ router.patch('/me', async (req, res) => {
     res.json({ id: user.id, name: user.name, email: user.email, avatarUrl: user.avatarUrl })
   } catch {
     res.status(401).json({ error: 'Invalid token' })
+  }
+})
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+})
+
+router.post('/avatar', async (req, res) => {
+  const token = req.cookies?.accessToken
+  if (!token) return res.status(401).json({ error: 'Not authenticated' })
+  try {
+    const payload = verifyAccess(token)
+    const { imageBase64 } = req.body
+    if (!imageBase64) return res.status(400).json({ error: 'No image provided' })
+
+    const result = await cloudinary.uploader.upload(imageBase64, {
+      folder: 'team-hub/avatars',
+      transformation: [{ width: 200, height: 200, crop: 'fill', gravity: 'face' }]
+    })
+
+    const user = await prisma.user.update({
+      where: { id: payload.id },
+      data: { avatarUrl: result.secure_url }
+    })
+
+    res.json({ avatarUrl: user.avatarUrl })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Upload failed' })
   }
 })
 

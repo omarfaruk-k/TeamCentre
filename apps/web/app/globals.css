@@ -1,55 +1,110 @@
 @import "tailwindcss";
+@variant dark (&:where(.dark, .dark *));
 
+/* ── Design tokens ── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Base surfaces */
+--bg:     #12111D;
+--bg2:    #16152A;   /* was #1A1927 — subtler lift */
+--bg3:    #1C1B30;   /* was #221F32 — less jump */
+--bg4:    #221F38;   /* was #2A2740 */
+--border: #252338;   /* was #2E2B45 — softer border */
+  --border2:   #3A3756;
+
+  /* Text */
+  --text:      #E8E6F0;
+  --text2:     #9B98B0;
+  --text3:     #5C5975;
+
+  /* Accent */
+  --accent:         #7C6EF0;
+  --accent-10:      #7C6EF015;
+  --accent-20:      #7C6EF025;
+  --accent-subtle:  #7C6EF010;
+  --accent-muted:   #7C6EF020;
+
+  /* Semantic */
+  --success: #4ade80;
+  --warning: #fbbf24;
+  --danger:  #f87171;
+  --info:    #60a5fa;
+
+  /* Radius */
+  --radius:    6px;
+  --radius-lg: 12px;
+
+  /* Legacy compat */
+  --background: var(--bg);
+  --foreground:  var(--text);
+}
+
+/* Light mode override */
+.light {
+  --bg:        #F4F3FA;
+  --bg2:       #EEEDF6;
+  --bg3:       #E5E3F0;
+  --bg4:       #DDDBE8;
+
+  --border:    #D4D2E3;
+  --border2:   #C8C6DA;
+
+  --text:      #1A1830;
+  --text2:     #5A5770;
+  --text3:     #9B98B0;
+
+  --accent:        #6C5CE7;
+  --accent-10:     #6C5CE715;
+  --accent-20:     #6C5CE725;
+  --accent-subtle: #6C5CE710;
+  --accent-muted:  #6C5CE720;
+
+  --background: var(--bg);
+  --foreground:  var(--text);
 }
 
 @theme inline {
   --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-foreground:  var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --accent: #7C3AED;
-  --accent-subtle: #7C3AED10;
-  --accent-muted: #7C3AED20;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ── Base ── */
+html, body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ── Dotted background ── */
+.dotted-bg {
+  background-image: radial-gradient(circle, var(--border) 1px, transparent 1px);
+  background-size: 28px 28px;
+  opacity: 1;
 }
 
+/* ── Cards ── */
+.card         { @apply rounded-[var(--radius-lg)] overflow-hidden; background: var(--bg2); border: 1px solid var(--border); }
+.card-header  { @apply flex items-center justify-between px-4 py-3.5; border-bottom: 1px solid var(--border); }
+.card-title   { @apply text-[13px] font-medium; color: var(--text); }
+.card-body    { @apply p-4; }
 
-/* Badge variants */
-.badge { @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium; }
+/* ── Buttons ── */
+.btn          { @apply inline-flex items-center gap-1.5 px-[14px] py-[6px] rounded-[var(--radius)] text-[13px] font-medium cursor-pointer border-none transition-all; font-family: inherit; }
+.btn-primary  { background: var(--accent); color: white; }
+.btn-primary:hover { opacity: .88; }
+.btn-ghost    { background: transparent; color: var(--text2); border: 1px solid var(--border); }
+.btn-ghost:hover { background: var(--bg3); color: var(--text); }
+
+/* ── Badges ── */
+.badge        { @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium; }
 .badge.on-track  { background: #14532d30; color: #4ade80; }
 .badge.at-risk   { background: #7c2d1230; color: #fb923c; }
 .badge.off-track { background: #7f1d1d30; color: #f87171; }
 .badge.completed { background: #1e3a5f30; color: #60a5fa; }
-.badge.todo      { background: var(--bg3);  color: var(--text3); }
-.badge.inprog    { background: var(--accent-10); color: var(--accent); }
+.badge.todo      { background: var(--bg3);        color: var(--text3); }
+.badge.inprog    { background: var(--accent-10);  color: var(--accent); }
 .badge.high      { background: #7f1d1d30; color: #f87171; }
 .badge.medium    { background: #78350f30; color: #fbbf24; }
 .badge.low       { background: #14532d30; color: #4ade80; }
-
-/* Cards */
-.card            { @apply rounded-[var(--radius-lg)] overflow-hidden; background: var(--bg2); border: 1px solid var(--border); }
-.card-header     { @apply flex items-center justify-between px-4 py-3.5; border-bottom: 1px solid var(--border); }
-.card-title      { @apply text-[13px] font-medium; color: var(--text); }
-.card-body       { @apply p-4; }
-
-/* Buttons */
-.btn             { @apply inline-flex items-center gap-1.5 px-[14px] py-[6px] rounded-[var(--radius)] text-[13px] font-medium cursor-pointer border-none transition-all; font-family: inherit; }
-.btn-primary     { background: var(--accent); color: white; }
-.btn-primary:hover { opacity: .9; }
-.btn-ghost       { background: transparent; color: var(--text2); border: 1px solid var(--border); }
-.btn-ghost:hover { background: var(--bg3); color: var(--text); }

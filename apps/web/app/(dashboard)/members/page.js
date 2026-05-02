@@ -45,69 +45,159 @@ export default function MembersPage() {
     load()
   }
 
+  const onlineCount = members.filter((m) => onlineIds.has(m.user.id)).length
+
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="flex flex-col h-full">
+
+      {/* Page header */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Members</h1>
+        <div>
+          <h1 className="text-2xl font-bold text-[var(--text)]">Members</h1>
+          <p className="text-sm text-[var(--text2)] mt-0.5">
+            {members.length} members · {' '}
+            <span className="text-emerald-400">{onlineCount} online</span>
+          </p>
+        </div>
       </div>
 
-      {role === 'ADMIN' && (
-        <form onSubmit={handleInvite} className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 mb-6">
-          <p className="text-sm font-medium mb-3">Invite by email</p>
-          {error && <p className="text-red-500 text-xs mb-2">{error}</p>}
-          <div className="flex gap-2">
-            <input
-              type="email" required placeholder="colleague@company.com"
-              value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)}
-              className="flex-1 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 bg-transparent outline-none text-sm"
-            />
-            <button type="submit" disabled={inviting}
-              className="px-4 py-2 rounded-lg text-white text-sm font-medium disabled:opacity-50"
-              style={{ backgroundColor: accent }}>
-              {inviting ? 'Inviting...' : 'Invite'}
-            </button>
-          </div>
-        </form>
-      )}
+      <div className="flex gap-5">
 
-      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-        {members.map((m) => (
-          <div key={m.user.id} className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-700 last:border-0">
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <div className="w-8 h-8 rounded-full text-white text-sm flex items-center justify-center font-bold"
-                  style={{ backgroundColor: accent }}>
-                  {m.user.name[0].toUpperCase()}
-                </div>
-                {onlineIds.has(m.user.id) && (
-                  <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white" />
-                )}
-              </div>
-              <div>
-                <p className="text-sm font-medium">{m.user.name}</p>
-                <p className="text-xs text-slate-400">{m.user.email}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              {role === 'ADMIN' ? (
-                <>
-                  <select value={m.role}
-                    onChange={(e) => handleRoleChange(m.user.id, e.target.value)}
-                    className="text-xs border border-slate-200 dark:border-slate-700 rounded px-2 py-1 bg-white dark:bg-slate-800 outline-none">
-                    <option value="ADMIN">Admin</option>
-                    <option value="MEMBER">Member</option>
-                  </select>
-                  <button onClick={() => handleRemove(m.user.id)}
-                    className="text-xs text-slate-400 hover:text-red-500">Remove</button>
-                </>
-              ) : (
-                <span className="text-xs bg-slate-100 dark:bg-slate-700 text-slate-500 px-2 py-0.5 rounded-full">
-                  {m.role}
-                </span>
+        {/* Left — member list */}
+        <div className="flex-1 min-w-0">
+          <div className="bg-[var(--bg2)] rounded-xl border border-[var(--border)] overflow-hidden">
+
+            {/* Table header */}
+            <div className="grid grid-cols-[1fr_auto_auto] gap-4 px-5 py-3 border-b border-[var(--border)] bg-[var(--bg)]">
+              <span className="text-xs font-semibold text-[var(--text2)] uppercase tracking-wider">Member</span>
+              <span className="text-xs font-semibold text-[var(--text2)] uppercase tracking-wider">Role</span>
+              {role === 'ADMIN' && (
+                <span className="text-xs font-semibold text-[var(--text2)] uppercase tracking-wider">Actions</span>
               )}
             </div>
+
+            {members.length === 0 && (
+              <div className="py-16 text-center text-[var(--text3)] text-sm">No members yet.</div>
+            )}
+
+            {members.map((m, i) => {
+              const isOnline = onlineIds.has(m.user.id)
+              return (
+                <div
+                  key={m.user.id}
+                  className="grid grid-cols-[1fr_auto_auto] gap-4 items-center px-5 py-3.5 border-b border-[var(--border)] last:border-0 hover:bg-[var(--bg3)] transition-colors"
+                >
+                  {/* Avatar + info */}
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="relative shrink-0">
+                      {m.user.avatarUrl ? (
+                        <img
+                          src={m.user.avatarUrl}
+                          alt={m.user.name}
+                          className="w-9 h-9 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div
+                          className="w-9 h-9 rounded-full text-white text-sm flex items-center justify-center font-bold"
+                          style={{ backgroundColor: accent }}>
+                          {m.user.name[0].toUpperCase()}
+                        </div>
+                      )}
+                      <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[var(--bg2)] ${isOnline ? 'bg-emerald-400' : 'bg-[var(--bg4)]'}`} />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-[var(--text)] truncate">{m.user.name}</p>
+                      <p className="text-xs text-[var(--text3)] truncate">{m.user.email}</p>
+                    </div>
+                  </div>
+
+                  {/* Role */}
+                  <div>
+                    {role === 'ADMIN' ? (
+                      <select
+                        value={m.role}
+                        onChange={(e) => handleRoleChange(m.user.id, e.target.value)}
+                        className="text-xs border border-[var(--border)] rounded-lg px-2.5 py-1.5 bg-[var(--bg3)] text-[var(--text2)] outline-none cursor-pointer hover:border-[var(--border2)] transition-colors">
+                        <option value="ADMIN">Admin</option>
+                        <option value="MEMBER">Member</option>
+                      </select>
+                    ) : (
+                      <span
+                        className="text-xs px-2.5 py-1 rounded-full font-medium"
+                        style={{
+                          backgroundColor: m.role === 'ADMIN' ? `${accent}20` : 'var(--bg3)',
+                          color: m.role === 'ADMIN' ? accent : 'var(--text2)',
+                          border: `1px solid ${m.role === 'ADMIN' ? `${accent}40` : 'var(--border)'}`
+                        }}>
+                        {m.role}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  {role === 'ADMIN' && (
+                    <button
+                      onClick={() => handleRemove(m.user.id)}
+                      className="text-xs text-[var(--text3)] hover:text-red-400 px-2.5 py-1.5 rounded-lg hover:bg-red-400/10 transition-colors">
+                      Remove
+                    </button>
+                  )}
+                </div>
+              )
+            })}
           </div>
-        ))}
+        </div>
+
+        {/* Right — invite panel */}
+        {role === 'ADMIN' && (
+          <div className="w-72 shrink-0">
+            <div className="bg-[var(--bg2)] rounded-xl border border-[var(--border)] p-5 sticky top-0">
+              <p className="text-sm font-semibold text-[var(--text)] mb-1">Invite a member</p>
+              <p className="text-xs text-[var(--text3)] mb-4">They'll receive an email to join this workspace.</p>
+
+              {error && (
+                <div className="text-xs text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2 mb-3">
+                  {error}
+                </div>
+              )}
+
+              <form onSubmit={handleInvite} className="space-y-3">
+                <input
+                  type="email" required placeholder="colleague@company.com"
+                  value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)}
+                  className="w-full border border-[var(--border)] rounded-lg px-3 py-2 bg-[var(--bg3)] text-[var(--text)] outline-none text-sm placeholder:text-[var(--text3)] focus:border-[var(--border2)] transition-colors"
+                />
+                <button
+                  type="submit" disabled={inviting}
+                  className="w-full py-2 rounded-lg text-white text-sm font-medium disabled:opacity-50 hover:opacity-90 transition-opacity"
+                  style={{ backgroundColor: accent }}>
+                  {inviting ? 'Inviting...' : 'Send Invite'}
+                </button>
+              </form>
+
+              {/* Online members summary */}
+              <div className="mt-5 pt-4 border-t border-[var(--border)]">
+                <p className="text-xs font-semibold text-[var(--text2)] uppercase tracking-wider mb-3">Online now</p>
+                <div className="flex flex-wrap gap-2">
+                  {members.filter((m) => onlineIds.has(m.user.id)).length === 0 && (
+                    <p className="text-xs text-[var(--text3)]">No one online</p>
+                  )}
+                  {members.filter((m) => onlineIds.has(m.user.id)).map((m) => (
+                    <div key={m.user.id} className="flex items-center gap-1.5">
+                      <div
+                        className="w-6 h-6 rounded-full text-white text-xs flex items-center justify-center font-bold"
+                        style={{ backgroundColor: accent }}>
+                        {m.user.name[0].toUpperCase()}
+                      </div>
+                      <span className="text-xs text-[var(--text2)]">{m.user.name.split(' ')[0]}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   )

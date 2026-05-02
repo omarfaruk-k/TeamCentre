@@ -36,20 +36,20 @@ export default function WorkspaceSwitcher() {
     <div className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 font-semibold text-slate-900 dark:text-white hover:opacity-80"
+        className="flex items-center gap-2 font-semibold text-[var(--text)] dark:text-[var(--text)] hover:opacity-80"
       >
         <span className="w-3 h-3 rounded-full" style={{ backgroundColor: accent }} />
         {active?.name || 'Select workspace'}
-        <span className="text-slate-400 text-xs">▾</span>
+        <span className="text-[var(--text2)] text-xs">▾</span>
       </button>
 
       {open && (
-        <div className="absolute top-8 left-0 w-64 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg z-50 p-2">
+        <div className="absolute top-8 left-0 w-64 bg-[var(--bg2)] border border-[var(--border)] rounded-xl shadow-lg z-50 p-2">
           {workspaces.map((ws) => (
             <button
               key={ws.id}
               onClick={() => { setActive(ws); setOpen(false) }}
-              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm hover:bg-slate-100 dark:hover:bg-slate-700 text-left"
+              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm hover:bg-slate-100 dark:hover:bg-[var(--bg3)] text-left"
             >
               <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: ws.accentColor }} />
               {ws.name}
@@ -57,14 +57,14 @@ export default function WorkspaceSwitcher() {
           ))}
 
           {creating ? (
-            <form onSubmit={handleCreate} className="mt-2 p-2 border-t border-slate-200 dark:border-slate-700 space-y-2">
+            <form onSubmit={handleCreate} className="mt-2 p-2 border-t border-[var(--border)] space-y-2">
               <input
                 autoFocus value={name} onChange={(e) => setName(e.target.value)}
                 placeholder="Workspace name"
-                className="w-full text-sm px-2 py-1 rounded border border-slate-200 dark:border-slate-700 bg-transparent outline-none"
+                className="w-full text-sm px-2 py-1 rounded border border-[var(--border)] bg-transparent outline-none"
               />
               <div>
-                <p className="text-xs text-slate-400 mb-1">Accent color</p>
+                <p className="text-xs text-[var(--text2)] mb-1">Accent color</p>
                 <div className="flex flex-wrap gap-1.5">
                   {ACCENT_COLORS.map((color) => (
                     <button
@@ -84,7 +84,7 @@ export default function WorkspaceSwitcher() {
               <div className="flex gap-2">
                 <button
                   type="submit"
-                  className="text-xs text-white px-3 py-1.5 rounded font-medium"
+                  className="text-xs text-[var(--text)] px-3 py-1.5 rounded font-medium"
                   style={{ backgroundColor: pickedColor }}
                 >
                   Create
@@ -92,7 +92,7 @@ export default function WorkspaceSwitcher() {
                 <button
                   type="button"
                   onClick={() => { setCreating(false); setName(''); setPickedColor('#7C3AED') }}
-                  className="text-xs text-slate-500 px-3 py-1.5 rounded hover:text-slate-900 dark:hover:text-white"
+                  className="text-xs text-[var(--text2)] px-3 py-1.5 rounded hover:text-[var(--text)] dark:hover:text-[var(--text)]"
                 >
                   Cancel
                 </button>
@@ -101,7 +101,7 @@ export default function WorkspaceSwitcher() {
           ) : (
             <button
               onClick={() => setCreating(true)}
-              className="w-full text-left px-3 py-2 text-sm text-slate-500 hover:text-slate-900 dark:hover:text-white border-t border-slate-200 dark:border-slate-700 mt-1"
+              className="w-full text-left px-3 py-2 text-sm text-[var(--text2)] hover:text-[var(--text)] dark:hover:text-[var(--text)] border-t border-[var(--border)] mt-1"
             >
               + New workspace
             </button>

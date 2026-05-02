@@ -82,4 +82,47 @@ router.post('/:goalId/updates', authenticate, async (req, res) => {
   res.status(201).json(update)
 })
 
+// Toggle milestone + recalculate progress
+router.patch('/:goalId/milestones/:milestoneId', authenticate, async (req, res) => {
+  const { completed } = req.body
+  await prisma.milestone.update({
+    where: { id: req.params.milestoneId },
+    data: { completed }
+  })
+
+  // Recalculate progress from milestones
+  const milestones = await prisma.milestone.findMany({
+    where: { goalId: req.params.goalId }
+  })
+  const progress = milestones.length === 0
+    ? 0
+    : Math.round((milestones.filter((m) => m.completed).length / milestones.length) * 100)
+
+  const goal = await prisma.goal.update({
+    where: { id: req.params.goalId },
+    data: { progress },
+    include: {
+      owner: { select: { id: true, name: true, avatarUrl: true } },
+      milestones: true,
+      updates: {
+        include: { author: { select: { id: true, name: true, avatarUrl: true } } },
+        orderBy: { createdAt: 'desc' }
+      }
+    }
+  })
+
+  req.io.to(`workspace:${req.params.workspaceId}`).emit('goal:updated', { goal })
+  res.json(goal)
+})
+
+// Add milestone
+router.post('/:goalId/milestones', authenticate, async (req, res) => {
+  const { title } = req.body
+  if (!title) return res.status(400).json({ error: 'Title required' })
+  const milestone = await prisma.milestone.create({
+    data: { title, goalId: req.params.goalId }
+  })
+  res.status(201).json(milestone)
+})
+
 export default router

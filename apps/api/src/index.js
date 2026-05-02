@@ -24,7 +24,7 @@ const io = new Server(httpServer, {
 initSocket(io)
 
 app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }))
-app.use(express.json())
+app.use(express.json({ limit: '10mb' }))
 app.use(cookieParser())
 
 // Pass io to every request

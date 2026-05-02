@@ -12,7 +12,7 @@ router.get('/stats', authenticate, async (req, res) => {
 
   const [totalGoals, completedThisWeek, overdueGoals, openItems] = await Promise.all([
     prisma.goal.count({ where: { workspaceId } }),
-    prisma.goal.count({ where: { workspaceId, status: 'COMPLETED', updatedAt: { gte: weekAgo } } }),
+    prisma.goal.count({ where: { workspaceId, status: 'COMPLETED', createdAt: { gte: weekAgo } } }),
     prisma.goal.count({ where: { workspaceId, dueDate: { lt: now }, status: { notIn: ['COMPLETED', 'CANCELLED'] } } }),
     prisma.actionItem.count({ where: { workspaceId, status: { not: 'DONE' } } }),
   ])
@@ -29,7 +29,7 @@ router.get('/goal-completion', authenticate, async (req, res) => {
     const weekStart = new Date(now - i * 7 * 24 * 60 * 60 * 1000)
     const weekEnd = new Date(weekStart.getTime() + 7 * 24 * 60 * 60 * 1000)
     const count = await prisma.goal.count({
-      where: { workspaceId, status: 'COMPLETED', updatedAt: { gte: weekStart, lt: weekEnd } }
+      where: { workspaceId, status: 'COMPLETED', createdAt: { gte: weekStart, lt: weekEnd } }
     })
     weeks.push({
       week: weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
