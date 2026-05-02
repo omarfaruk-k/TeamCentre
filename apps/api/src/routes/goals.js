@@ -39,7 +39,14 @@ router.get('/:goalId', authenticate, async (req, res) => {
     include: {
       owner: { select: { id: true, name: true, avatarUrl: true } },
       milestones: true,
-      updates: { include: { author: { select: { id: true, name: true, avatarUrl: true } } }, orderBy: { createdAt: 'desc' } }
+      updates: {
+        include: { author: { select: { id: true, name: true, avatarUrl: true } } },
+        orderBy: { createdAt: 'desc' }
+      },
+      actionItems: {
+        include: { assignee: { select: { id: true, name: true, avatarUrl: true } } },
+        orderBy: { createdAt: 'desc' }
+      }
     }
   })
   if (!goal) return res.status(404).json({ error: 'Goal not found' })
@@ -78,7 +85,7 @@ router.post('/:goalId/updates', authenticate, async (req, res) => {
     data: { content, goalId: req.params.goalId, authorId: req.user.id },
     include: { author: { select: { id: true, name: true, avatarUrl: true } } }
   })
-  req.io.to(`workspace:${req.params.workspaceId}`).emit('goal:updated', { goal })
+  req.io.to(`workspace:${req.params.workspaceId}`).emit('goal:update:added', { update })
   res.status(201).json(update)
 })
 
@@ -98,7 +105,7 @@ router.patch('/:goalId/milestones/:milestoneId', authenticate, async (req, res) 
     ? 0
     : Math.round((milestones.filter((m) => m.completed).length / milestones.length) * 100)
 
-  const goal = await prisma.goal.update({
+const goal = await prisma.goal.update({
     where: { id: req.params.goalId },
     data: { progress },
     include: {
@@ -106,6 +113,10 @@ router.patch('/:goalId/milestones/:milestoneId', authenticate, async (req, res) 
       milestones: true,
       updates: {
         include: { author: { select: { id: true, name: true, avatarUrl: true } } },
+        orderBy: { createdAt: 'desc' }
+      },
+      actionItems: {
+        include: { assignee: { select: { id: true, name: true, avatarUrl: true } } },
         orderBy: { createdAt: 'desc' }
       }
     }

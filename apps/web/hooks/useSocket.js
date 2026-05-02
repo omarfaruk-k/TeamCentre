@@ -57,11 +57,20 @@ socket.on('comment:created', ({ announcementId, comment }) => {
       }))
     })
 
-    socket.on('goal:updated', ({ goal }) => {
-      useGoalStore.setState((s) => ({
-        goals: s.goals.map((g) => g.id === goal.id ? goal : g)
-      }))
-    })
+socket.on('goal:updated', ({ goal }) => {
+  useGoalStore.setState((s) => ({
+    goals: s.goals.map((g) => g.id === goal.id ? goal : g),
+    active: s.active?.id === goal.id ? goal : s.active
+  }))
+})
+
+socket.on('goal:update:added', ({ update }) => {
+  useGoalStore.setState((s) => ({
+    active: s.active?.id === update.goalId
+      ? { ...s.active, updates: [update, ...(s.active.updates || [])] }
+      : s.active
+  }))
+})
 
     return () => {
       socket.emit('leave:workspace', { workspaceId: workspace.id, userId: user.id })
@@ -71,6 +80,7 @@ socket.on('comment:created', ({ announcementId, comment }) => {
       socket.off('comment:created')
       socket.off('actionItem:updated')
       socket.off('goal:updated')
+      socket.off('goal:update:added')
       socket.disconnect()
     }
   }, [user, workspace?.id])

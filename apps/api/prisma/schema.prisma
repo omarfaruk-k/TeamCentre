@@ -64,6 +64,7 @@ model Goal {
   status      GoalStatus @default(ON_TRACK)
   dueDate     DateTime?
   createdAt   DateTime   @default(now())
+  progress  Int  @default(0)
 
   ownerId     String
   workspaceId String

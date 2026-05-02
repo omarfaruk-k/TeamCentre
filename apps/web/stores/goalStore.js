@@ -34,16 +34,14 @@ export const useGoalStore = create((set, get) => ({
     set((s) => ({ goals: s.goals.filter((g) => g.id !== goalId) }))
   },
 
-  addUpdate: async (workspaceId, goalId, content) => {
-    const res = await api.post(`/workspaces/${workspaceId}/goals/${goalId}/updates`, { content })
-    set((s) => ({
-      active: s.active ? { ...s.active, updates: [res.data, ...(s.active.updates || [])] } : s.active
-    }))
-  },
+addUpdate: async (workspaceId, goalId, content) => {
+  await api.post(`/workspaces/${workspaceId}/goals/${goalId}/updates`, { content })
+  // don't update local state here — socket 'goal:update:added' handles it
+},
 
 toggleMilestone: async (workspaceId, goalId, milestoneId, completed) => {
   const prev = get().active
-  // Optimistic update for milestone only
+  // optimistic update
   set((s) => ({
     active: s.active ? {
       ...s.active,
@@ -53,14 +51,14 @@ toggleMilestone: async (workspaceId, goalId, milestoneId, completed) => {
     } : s.active
   }))
   try {
-    const res = await api.patch(
+    await api.patch(
       `/workspaces/${workspaceId}/goals/${goalId}/milestones/${milestoneId}`,
       { completed }
     )
-    // Sync full goal including recalculated progress
-    set({ active: res.data })
+    // don't set active here — socket 'goal:updated' will fire with full updated goal including new progress
   } catch {
     set({ active: prev })
   }
 }
+
 }))

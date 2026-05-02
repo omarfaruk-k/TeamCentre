@@ -4,6 +4,7 @@ import { authenticate } from '../middleware/authenticate.js'
 
 const router = Router({ mergeParams: true })
 
+
 router.post('/', authenticate, async (req, res) => {
   const { title } = req.body
   if (!title) return res.status(400).json({ error: 'Title required' })

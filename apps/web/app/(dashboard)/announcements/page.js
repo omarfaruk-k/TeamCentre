@@ -74,13 +74,11 @@ export default function AnnouncementsPage() {
             onChange={(e) => setForm({ ...form, content: e.target.value })}
             className="w-full border border-[var(--border)] rounded-lg px-3 py-2 bg-[var(--bg3)] text-[var(--text)] outline-none text-sm h-28 resize-none placeholder:text-[var(--text3)]" />
           <div className="flex gap-2 justify-end">
-            <button
-              type="button" onClick={() => setShowForm(false)}
+            <button type="button" onClick={() => setShowForm(false)}
               className="px-4 py-2 text-sm rounded-lg border border-[var(--border)] text-[var(--text2)] hover:bg-[var(--bg3)] transition-colors">
               Cancel
             </button>
-            <button
-              type="submit"
+            <button type="submit"
               className="px-4 py-2 text-sm rounded-lg text-white hover:opacity-90 transition-opacity"
               style={{ backgroundColor: accent }}>
               Post
@@ -89,7 +87,7 @@ export default function AnnouncementsPage() {
         </form>
       )}
 
-      {/* Announcements list */}
+      {/* Announcements list — page scrolls */}
       <div className="flex flex-col gap-4 overflow-y-auto flex-1 pr-1">
 
         {sorted.length === 0 && (
@@ -100,58 +98,68 @@ export default function AnnouncementsPage() {
           <div
             key={a.id}
             className="bg-[var(--bg2)] rounded-xl border border-[var(--border)] overflow-hidden"
-            style={{ minHeight: '220px' }}
           >
             {/*
-              The key insight: this inner div must be h-full so both columns
-              stretch to the full card height. The card height is determined
-              by whichever column is taller (content or comments).
+              position: relative on this wrapper lets the right column use
+              position: absolute to always span the full card height.
+              The left column (70%) drives the card height freely.
+              The right column is pinned top-to-bottom so comments always scroll.
             */}
-            <div style={{ display: 'flex', minHeight: '220px' }}>
+            <div style={{ position: 'relative', minHeight: '200px' }}>
 
-              {/* ── LEFT 70% ── header + content + spacer + reactions at bottom */}
-              <div style={{ width: '70%', borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', padding: '20px' }}>
-
-                {/* Header */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                  <div>
-                    {a.pinned && (
-                      <span style={{ fontSize: '11px', fontWeight: 600, color: '#f59e0b', display: 'block', marginBottom: '4px' }}>📌 Pinned</span>
-                    )}
-                    <h2 style={{ fontWeight: 600, fontSize: '15px', color: 'var(--text)', margin: 0 }}>{a.title}</h2>
-                    <p style={{ fontSize: '11px', color: 'var(--text2)', marginTop: '2px' }}>
-                      {a.author?.name} · {new Date(a.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                  {role === 'ADMIN' && (
-                    <div style={{ display: 'flex', gap: '4px' }}>
-                      <button
-                        onClick={() => togglePin(workspace.id, a.id)}
-                        style={{ fontSize: '11px', color: 'var(--text2)', padding: '4px 8px', borderRadius: '6px', background: 'none', border: 'none', cursor: 'pointer' }}
-                        onMouseEnter={e => e.target.style.color = '#f59e0b'}
-                        onMouseLeave={e => e.target.style.color = 'var(--text2)'}>
-                        {a.pinned ? 'Unpin' : 'Pin'}
-                      </button>
-                      <button
-                        onClick={() => deleteAnnouncement(workspace.id, a.id)}
-                        style={{ fontSize: '11px', color: 'var(--text2)', padding: '4px 8px', borderRadius: '6px', background: 'none', border: 'none', cursor: 'pointer' }}
-                        onMouseEnter={e => e.target.style.color = '#ef4444'}
-                        onMouseLeave={e => e.target.style.color = 'var(--text2)'}>
-                        Delete
-                      </button>
+              {/* LEFT — drives card height, 70% wide with right padding for the comments panel */}
+              <div
+                style={{
+                  width: '70%',
+                  paddingRight: '0',
+                  boxSizing: 'border-box',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  padding: '20px',
+                  borderRight: '1px solid var(--border)',
+                  minHeight: '200px',
+                }}
+              >
+                {/* Top group: header + content */}
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+                    <div>
+                      {a.pinned && (
+                        <span style={{ fontSize: '11px', fontWeight: 600, color: '#f59e0b', display: 'block', marginBottom: '4px' }}>
+                          📌 Pinned
+                        </span>
+                      )}
+                      <h2 style={{ fontWeight: 600, fontSize: '15px', color: 'var(--text)', margin: 0 }}>{a.title}</h2>
+                      <p style={{ fontSize: '11px', color: 'var(--text2)', marginTop: '2px' }}>
+                        {a.author?.name} · {new Date(a.createdAt).toLocaleDateString()}
+                      </p>
                     </div>
-                  )}
+                    {role === 'ADMIN' && (
+                      <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
+                        <button
+                          onClick={() => togglePin(workspace.id, a.id)}
+                          className="text-[var(--text2)] hover:text-amber-400 px-2 py-1 rounded-lg hover:bg-[var(--bg3)] transition-colors"
+                          style={{ fontSize: '11px', background: 'none', border: 'none', cursor: 'pointer' }}>
+                          {a.pinned ? 'Unpin' : 'Pin'}
+                        </button>
+                        <button
+                          onClick={() => deleteAnnouncement(workspace.id, a.id)}
+                          className="text-[var(--text2)] hover:text-red-400 px-2 py-1 rounded-lg hover:bg-[var(--bg3)] transition-colors"
+                          style={{ fontSize: '11px', background: 'none', border: 'none', cursor: 'pointer' }}>
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Content — no scroll, card grows */}
+                  <p style={{ fontSize: '13px', color: 'var(--text2)', whiteSpace: 'pre-wrap', lineHeight: '1.6', margin: 0 }}>
+                    {a.content}
+                  </p>
                 </div>
 
-                {/* Content */}
-                <p style={{ fontSize: '13px', color: 'var(--text2)', whiteSpace: 'pre-wrap', lineHeight: '1.6', margin: 0 }}>
-                  {a.content}
-                </p>
-
-                {/* Spacer pushes reactions to bottom */}
-                <div style={{ flex: 1 }} />
-
-                {/* Reactions — pinned to bottom */}
+                {/* Bottom: Reactions always pinned to bottom via justify-between */}
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '16px' }}>
                   {EMOJIS.map((emoji) => {
                     const count = a.reactions?.filter((r) => r.emoji === emoji).length || 0
@@ -178,42 +186,63 @@ export default function AnnouncementsPage() {
                 </div>
               </div>
 
-              {/* ── RIGHT 30% ── comments header + scrollable list + input at bottom */}
-              <div style={{ width: '30%', display: 'flex', flexDirection: 'column' }}>
-
+              {/* RIGHT — absolutely positioned, always full card height, comments scroll inside */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  right: 0,
+                  bottom: 0,
+                  width: '30%',
+                  borderLeft: '1px solid var(--border)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
                 {/* Comments header */}
-                <div style={{ padding: '6px 12px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-                  <span style={{ fontSize: '10px', fontWeight: 600, color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Comments</span>
+                <div style={{
+                  padding: '6px 12px',
+                  borderBottom: '1px solid var(--border)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  flexShrink: 0,
+                }}>
+                  <span style={{ fontSize: '10px', fontWeight: 600, color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Comments
+                  </span>
                   <span style={{ fontSize: '10px', fontWeight: 600, padding: '1px 6px', borderRadius: '999px', backgroundColor: `${accent}20`, color: accent }}>
                     {a.comments?.length || 0}
                   </span>
                 </div>
 
-                {/* Scrollable comments — flex-1 so input stays at bottom */}
+                {/* Scrollable comments — flex:1 fills the bounded height from absolute positioning */}
                 <div
                   ref={(el) => (commentRefs.current[a.id] = el)}
-                  style={{ flex: 1, overflowY: 'auto', padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  style={{ flex: 1, overflowY: 'auto', padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '10px' }}
+                >
                   {(!a.comments || a.comments.length === 0) && (
                     <p style={{ fontSize: '11px', color: 'var(--text3)', textAlign: 'center', marginTop: '16px' }}>No comments yet.</p>
                   )}
                   {a.comments?.map((c) => (
-                    <div key={c.id} style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div key={c.id}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
                         <div style={{
-                          width: '20px', height: '20px', borderRadius: '50%', backgroundColor: accent,
-                          color: 'white', fontSize: '10px', display: 'flex', alignItems: 'center',
-                          justifyContent: 'center', fontWeight: 700, flexShrink: 0
+                          width: '20px', height: '20px', borderRadius: '50%',
+                          backgroundColor: accent, color: 'white', fontSize: '10px',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontWeight: 700, flexShrink: 0,
                         }}>
                           {c.user?.name?.[0]?.toUpperCase()}
                         </div>
                         <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text)' }}>{c.user?.name}</span>
                       </div>
-                      <p style={{ fontSize: '11px', color: 'var(--text2)', marginLeft: '28px', lineHeight: '1.5', margin: '2px 0 0 28px' }}>{c.content}</p>
+                      <p style={{ fontSize: '11px', color: 'var(--text2)', marginLeft: '28px', lineHeight: '1.5', margin: '0 0 0 28px' }}>
+                        {c.content}
+                      </p>
                     </div>
                   ))}
                 </div>
 
-                {/* Comment input — always at bottom */}
+                {/* Comment input — shrink-0 always at bottom */}
                 <div style={{ padding: '8px 12px', flexShrink: 0, display: 'flex', gap: '8px' }}>
                   <input
                     placeholder="Comment..."
@@ -221,21 +250,24 @@ export default function AnnouncementsPage() {
                     onChange={(e) => setCommentInputs((s) => ({ ...s, [a.id]: e.target.value }))}
                     onKeyDown={(e) => e.key === 'Enter' && handleComment(a.id)}
                     style={{
-                      flex: 1, fontSize: '11px', border: '1px solid var(--border)', borderRadius: '8px',
-                      padding: '6px 10px', backgroundColor: 'var(--bg3)', color: 'var(--text)', outline: 'none'
+                      flex: 1, fontSize: '11px',
+                      border: '1px solid var(--border)', borderRadius: '8px',
+                      padding: '6px 10px', backgroundColor: 'var(--bg3)',
+                      color: 'var(--text)', outline: 'none',
                     }}
                   />
                   <button
                     onClick={() => handleComment(a.id)}
                     style={{
                       fontSize: '11px', padding: '6px 12px', borderRadius: '8px',
-                      backgroundColor: accent, color: 'white', border: 'none', cursor: 'pointer', flexShrink: 0
+                      backgroundColor: accent, color: 'white',
+                      border: 'none', cursor: 'pointer', flexShrink: 0,
                     }}>
                     Send
                   </button>
                 </div>
-
               </div>
+
             </div>
           </div>
         ))}

@@ -5,6 +5,7 @@ import { useWorkspaceStore } from '../../../../stores/workspaceStore'
 import { useGoalStore } from '../../../../stores/goalStore'
 import api from '../../../../lib/api'
 
+
 const STATUS_CONFIG = {
   ON_TRACK:  { label: 'On Track',  bg: 'bg-[#14532d25]', text: 'text-emerald-400', border: 'border-[#14532d40]', dot: 'bg-emerald-400' },
   AT_RISK:   { label: 'At Risk',   bg: 'bg-[#78350f25]', text: 'text-amber-400',   border: 'border-[#78350f40]', dot: 'bg-amber-400' },
