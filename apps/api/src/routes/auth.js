@@ -7,8 +7,8 @@ const router = Router()
 
 const cookieOpts = {
   httpOnly: true,
-  sameSite: 'lax',
-  secure: process.env.NODE_ENV === 'production'
+  sameSite: 'none',
+  secure: true
 }
 
 router.post('/register', async (req, res) => {
