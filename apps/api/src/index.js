@@ -11,6 +11,7 @@ import goalRouter from './routes/goals.js'
 import milestoneRouter from './routes/milestones.js'
 import announcementRouter from './routes/announcements.js'
 import actionItemRouter from './routes/actionItems.js'
+import analyticsRouter from './routes/analytics.js'
 
 dotenv.config()
 
@@ -36,6 +37,7 @@ app.use('/workspaces/:workspaceId/goals', goalRouter)
 app.use('/workspaces/:workspaceId/goals/:goalId/milestones', milestoneRouter)
 app.use('/workspaces/:workspaceId/announcements', announcementRouter)
 app.use('/workspaces/:workspaceId/action-items', actionItemRouter)
+app.use('/workspaces/:workspaceId/analytics', analyticsRouter)
 
 const PORT = process.env.PORT || 4000
 httpServer.listen(PORT, () => console.log(`API running on port ${PORT}`))
