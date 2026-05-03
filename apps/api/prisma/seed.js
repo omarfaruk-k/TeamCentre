@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt'
 const prisma = new PrismaClient()
 
 async function main() {
-  console.log('Seeding...')
+  console.log('🌱 Seeding...')
 
   await prisma.reaction.deleteMany()
   await prisma.comment.deleteMany()
@@ -20,53 +20,73 @@ async function main() {
 
   const hash = await bcrypt.hash('pass', 10)
 
-  // Create 7 users (80% Bangladeshi, 20% foreign)
-  const [arif, bristy, tanvir, danish, evan, fahim, george] = await Promise.all([
-    prisma.user.create({ data: { name: 'Arif Hossain',     email: 'a@a.com', passwordHash: hash } }), // BD
-    prisma.user.create({ data: { name: 'Bristy Rahman',    email: 'b@b.com', passwordHash: hash } }), // BD
-    prisma.user.create({ data: { name: 'Chowdhury Tanvir', email: 'c@c.com', passwordHash: hash } }), // BD
-    prisma.user.create({ data: { name: 'Danish Uddin',     email: 'd@d.com', passwordHash: hash } }), // BD (male Muslim)
-    prisma.user.create({ data: { name: 'Evan Walsh',       email: 'e@e.com', passwordHash: hash } }), // Foreign
-    prisma.user.create({ data: { name: 'Fahim Chowdhury',  email: 'f@f.com', passwordHash: hash } }), // BD (male Muslim)
-    prisma.user.create({ data: { name: 'George Osei',      email: 'g@g.com', passwordHash: hash } }), // Foreign
+  // ── USERS ──────────────────────────────────────────────────────────────
+  const [alpha, bravo, charlie, delta, echo, foxtrot, golf] = await Promise.all([
+    prisma.user.create({ data: { name: 'Alpha Khan',        email: 'a@a.com', passwordHash: hash, emailVerified: true } }),
+    prisma.user.create({ data: { name: 'Bravo Mia',         email: 'b@b.com', passwordHash: hash, emailVerified: true } }),
+    prisma.user.create({ data: { name: 'Chowdhury Delta',   email: 'c@c.com', passwordHash: hash, emailVerified: true } }),
+    prisma.user.create({ data: { name: 'Danish Quasar',     email: 'd@d.com', passwordHash: hash, emailVerified: true } }),
+    prisma.user.create({ data: { name: 'Echo Rahman',       email: 'e@e.com', passwordHash: hash, emailVerified: true } }),
+    prisma.user.create({ data: { name: 'Foxtrot Hossain',   email: 'f@f.com', passwordHash: hash, emailVerified: true } }),
+    prisma.user.create({ data: { name: 'Golf Neutron',      email: 'g@g.com', passwordHash: hash, emailVerified: true } }),
   ])
 
-  // Create workspace
-  const workspace = await prisma.workspace.create({
+  // ── WORKSPACE 1 — Tech Startup ─────────────────────────────────────────
+  const ws1 = await prisma.workspace.create({
     data: {
-      name: 'Acme Product Team',
+      name: 'Quantum Launchpad',
       accentColor: '#7C3AED',
       members: {
         create: [
-          { userId: arif.id,   role: 'ADMIN' },
-          { userId: bristy.id, role: 'MEMBER' },
-          { userId: tanvir.id, role: 'MEMBER' },
-          { userId: danish.id, role: 'MEMBER' },
-          { userId: evan.id,   role: 'MEMBER' },
-          { userId: fahim.id,  role: 'MEMBER' },
-          { userId: george.id, role: 'MEMBER' },
+          { userId: alpha.id,   role: 'ADMIN' },
+          { userId: bravo.id,   role: 'MEMBER' },
+          { userId: charlie.id, role: 'MEMBER' },
+          { userId: delta.id,   role: 'MEMBER' },
+          { userId: echo.id,    role: 'MEMBER' },
+          { userId: foxtrot.id, role: 'MEMBER' },
+          { userId: golf.id,    role: 'MEMBER' },
         ]
       }
     }
   })
 
-  const w = workspace.id
+  // ── WORKSPACE 2 — Design Team ──────────────────────────────────────────
+  const ws2 = await prisma.workspace.create({
+    data: {
+      name: 'Pixel Syndicate',
+      accentColor: '#0EA5E9',
+      members: {
+        create: [
+          { userId: bravo.id,   role: 'ADMIN' },
+          { userId: alpha.id,   role: 'MEMBER' },
+          { userId: charlie.id, role: 'MEMBER' },
+          { userId: delta.id,   role: 'MEMBER' },
+        ]
+      }
+    }
+  })
 
-  // ── GOALS ──────────────────────────────────────────────────────────────
+  const w = ws1.id
+  const w2 = ws2.id
+
+  // ── GOALS — WS1 ────────────────────────────────────────────────────────
+
   const goal1 = await prisma.goal.create({
     data: {
-      title: 'Launch v2.0 of mobile app',
-      description: 'Complete redesign and ship to both app stores by end of Q2.',
+      title: 'Launch v3.0 of NeuralSync App',
+      description: 'Complete the full redesign, squash all critical bugs, and ship to both app stores before Eid ul Adha. No pressure 😅',
       status: 'ON_TRACK',
-      dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-      workspaceId: w, ownerId: arif.id,
+      progress: 65,
+      dueDate: new Date(Date.now() + 28 * 24 * 60 * 60 * 1000),
+      workspaceId: w, ownerId: alpha.id,
       milestones: {
         create: [
-          { title: 'Finalize UI designs', completed: true, progress: 100 },
-          { title: 'Complete backend API', completed: true, progress: 100 },
-          { title: 'Beta testing with 50 users', completed: true, progress: 100 },
-          { title: 'App store submission', completed: false, progress: 40 },
-          { title: 'Marketing launch', completed: false, progress: 10 },
+          { title: 'UI redesign finalized', completed: true },
+          { title: 'Backend API v3 complete', completed: true },
+          { title: 'Beta test with 100 users', completed: true },
+          { title: 'Fix all P0/P1 bugs', completed: false },
+          { title: 'App store submission', completed: false },
+          { title: 'Marketing blast on launch day', completed: false },
         ]
       }
     }
@@ -74,17 +94,19 @@ async function main() {
 
   const goal2 = await prisma.goal.create({
     data: {
-      title: 'Grow to 10k monthly active users',
-      description: 'Marketing and growth initiatives targeting Q2 milestones.',
+      title: 'Reach 25k MAU by Q3',
+      description: 'Growth target. If we don\'t hit this, Chowdhury Delta has to eat biryani with a fork.',
       status: 'AT_RISK',
-      dueDate: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000),
-      workspaceId: w, ownerId: bristy.id,
+      progress: 38,
+      dueDate: new Date(Date.now() + 52 * 24 * 60 * 60 * 1000),
+      workspaceId: w, ownerId: bravo.id,
       milestones: {
         create: [
-          { title: 'Launch referral program', completed: true, progress: 100 },
-          { title: 'Partnership with 5 influencers', completed: false, progress: 60 },
-          { title: 'Paid ads campaign live', completed: false, progress: 30 },
-          { title: 'Reach 7k MAU checkpoint', completed: false, progress: 0 },
+          { title: 'Launch referral program', completed: true },
+          { title: 'TikTok campaign with 3 creators', completed: false },
+          { title: 'SEO audit and fix', completed: false },
+          { title: 'Hit 15k MAU checkpoint', completed: false },
+          { title: 'Paid ads ROI positive', completed: false },
         ]
       }
     }
@@ -92,17 +114,18 @@ async function main() {
 
   const goal3 = await prisma.goal.create({
     data: {
-      title: 'Reduce churn rate to under 5%',
-      description: 'Improve onboarding flow and customer success touchpoints.',
+      title: 'Reduce server costs by 30%',
+      description: 'Current AWS bill is giving us existential dread. Time to optimize.',
       status: 'COMPLETED',
-      dueDate: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
-      workspaceId: w, ownerId: tanvir.id,
-      createdAt: new Date(Date.now() - 8 * 7 * 24 * 60 * 60 * 1000),
+      progress: 100,
+      dueDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
+      workspaceId: w, ownerId: charlie.id,
       milestones: {
         create: [
-          { title: 'Audit drop-off points', completed: true, progress: 100 },
-          { title: 'Redesign onboarding', completed: true, progress: 100 },
-          { title: 'Launch in-app support chat', completed: true, progress: 100 },
+          { title: 'Audit all running services', completed: true },
+          { title: 'Migrate to spot instances', completed: true },
+          { title: 'Set up auto-scaling', completed: true },
+          { title: 'Shut down zombie containers', completed: true },
         ]
       }
     }
@@ -110,17 +133,18 @@ async function main() {
 
   const goal4 = await prisma.goal.create({
     data: {
-      title: 'Ship new analytics dashboard',
-      description: 'Internal analytics for the ops team with CSV export.',
+      title: 'Ship Dark Mode (Finally)',
+      description: 'Users have been asking since 2022. It\'s embarrassing at this point.',
       status: 'COMPLETED',
-      dueDate: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000),
-      workspaceId: w, ownerId: danish.id,
-      createdAt: new Date(Date.now() - 6 * 7 * 24 * 60 * 60 * 1000),
+      progress: 100,
+      dueDate: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000),
+      workspaceId: w, ownerId: delta.id,
       milestones: {
         create: [
-          { title: 'Define KPIs with stakeholders', completed: true, progress: 100 },
-          { title: 'Build chart components', completed: true, progress: 100 },
-          { title: 'CSV export endpoint', completed: true, progress: 100 },
+          { title: 'Design tokens defined', completed: true },
+          { title: 'All components updated', completed: true },
+          { title: 'System preference detection', completed: true },
+          { title: 'QA on 5 devices', completed: true },
         ]
       }
     }
@@ -128,17 +152,19 @@ async function main() {
 
   const goal5 = await prisma.goal.create({
     data: {
-      title: 'Improve API response time by 40%',
-      description: 'Database query optimization and caching layer.',
-      status: 'COMPLETED',
-      dueDate: new Date(Date.now() - 35 * 24 * 60 * 60 * 1000),
-      workspaceId: w, ownerId: evan.id,
-      createdAt: new Date(Date.now() - 4 * 7 * 24 * 60 * 60 * 1000),
+      title: 'Hire 4 Engineers Before Ramadan',
+      description: 'Ambitious? Yes. Necessary? Also yes.',
+      status: 'AT_RISK',
+      progress: 40,
+      dueDate: new Date(Date.now() + 18 * 24 * 60 * 60 * 1000),
+      workspaceId: w, ownerId: echo.id,
       milestones: {
         create: [
-          { title: 'Profile slow queries', completed: true, progress: 100 },
-          { title: 'Add Redis caching', completed: true, progress: 100 },
-          { title: 'Load test and benchmark', completed: true, progress: 100 },
+          { title: 'Post JDs on LinkedIn and Bdjobs', completed: true },
+          { title: 'Screen 50 CVs', completed: true },
+          { title: 'First round interviews done', completed: false },
+          { title: 'Technical assessments sent', completed: false },
+          { title: 'Offers accepted', completed: false },
         ]
       }
     }
@@ -146,17 +172,19 @@ async function main() {
 
   const goal6 = await prisma.goal.create({
     data: {
-      title: 'GDPR compliance audit',
-      description: 'Ensure all data handling meets GDPR requirements.',
-      status: 'COMPLETED',
-      dueDate: new Date(Date.now() - 42 * 24 * 60 * 60 * 1000),
-      workspaceId: w, ownerId: fahim.id,
-      createdAt: new Date(Date.now() - 2 * 7 * 24 * 60 * 60 * 1000),
+      title: 'ISO 27001 Security Certification',
+      description: 'Enterprise clients are demanding it. Let\'s get it done.',
+      status: 'ON_TRACK',
+      progress: 55,
+      dueDate: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000),
+      workspaceId: w, ownerId: foxtrot.id,
       milestones: {
         create: [
-          { title: 'Data inventory mapping', completed: true, progress: 100 },
-          { title: 'Update privacy policy', completed: true, progress: 100 },
-          { title: 'User data deletion flow', completed: true, progress: 100 },
+          { title: 'Gap analysis complete', completed: true },
+          { title: 'Security policy documents', completed: true },
+          { title: 'Staff security training', completed: false },
+          { title: 'Internal audit', completed: false },
+          { title: 'External auditor booked', completed: false },
         ]
       }
     }
@@ -164,17 +192,38 @@ async function main() {
 
   const goal7 = await prisma.goal.create({
     data: {
-      title: 'Hire 3 senior engineers',
-      description: 'Expand the engineering team for H2 roadmap.',
-      status: 'AT_RISK',
-      dueDate: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000),
-      workspaceId: w, ownerId: george.id,
+      title: 'Integrate AI Chatbot (GPT-powered)',
+      description: 'Everyone else has one. Time to join the bandwagon — but make it actually useful.',
+      status: 'ON_TRACK',
+      progress: 30,
+      dueDate: new Date(Date.now() + 35 * 24 * 60 * 60 * 1000),
+      workspaceId: w, ownerId: golf.id,
       milestones: {
         create: [
-          { title: 'Post job descriptions', completed: true, progress: 100 },
-          { title: 'First round interviews', completed: true, progress: 100 },
-          { title: 'Technical assessments', completed: false, progress: 50 },
-          { title: 'Offers sent', completed: false, progress: 0 },
+          { title: 'OpenAI API integration', completed: true },
+          { title: 'Training on product docs', completed: false },
+          { title: 'Chat UI component', completed: false },
+          { title: 'User testing round 1', completed: false },
+        ]
+      }
+    }
+  })
+
+  // ── GOALS — WS2 ────────────────────────────────────────────────────────
+  const goal8 = await prisma.goal.create({
+    data: {
+      title: 'Rebrand entire product UI',
+      description: 'New logo, new colours, new energy. Out with the old gradient mess.',
+      status: 'ON_TRACK',
+      progress: 50,
+      dueDate: new Date(Date.now() + 40 * 24 * 60 * 60 * 1000),
+      workspaceId: w2, ownerId: bravo.id,
+      milestones: {
+        create: [
+          { title: 'Logo design finalized', completed: true },
+          { title: 'Colour system defined', completed: true },
+          { title: 'Component library updated', completed: false },
+          { title: 'Landing page redesign', completed: false },
         ]
       }
     }
@@ -183,126 +232,197 @@ async function main() {
   // ── GOAL UPDATES ───────────────────────────────────────────────────────
   await prisma.goalUpdate.createMany({
     data: [
-      { content: 'Beta testing started! 50 users onboarded, feedback is mostly positive.', goalId: goal1.id, authorId: arif.id },
-      { content: 'App store submission in progress, expecting approval within 5 days.', goalId: goal1.id, authorId: arif.id },
-      { content: 'Referral program live. Seeing 12% week-over-week growth from referrals.', goalId: goal2.id, authorId: bristy.id },
-      { content: 'MAU at 6.2k — need to accelerate paid campaigns to hit 10k by deadline.', goalId: goal2.id, authorId: bristy.id },
-      { content: 'Onboarding redesign shipped. Early data shows 18% reduction in drop-off.', goalId: goal3.id, authorId: tanvir.id },
-      { content: 'Churn now at 4.3% — goal achieved! Monitoring for 2 more weeks.', goalId: goal3.id, authorId: tanvir.id },
-      { content: 'Dashboard shipped to production. Ops team very happy with CSV export.', goalId: goal4.id, authorId: danish.id },
-      { content: 'API p95 response time down from 420ms to 210ms after Redis caching.', goalId: goal5.id, authorId: evan.id },
-      { content: 'GDPR audit complete. Legal team signed off on all changes.', goalId: goal6.id, authorId: fahim.id },
-      { content: 'Two strong candidates from technical round. Offers going out this week.', goalId: goal7.id, authorId: george.id },
+      { content: 'Beta feedback is in — 87% satisfaction. Only complaint is the font size on Android. Classic.', goalId: goal1.id, authorId: alpha.id, createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000) },
+      { content: 'P0 bug fixed — the one that crashed the app when someone typed their name in Arabic. Embarrassing but fixed.', goalId: goal1.id, authorId: charlie.id, createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000) },
+      { content: 'Referral program live since Monday. 340 new signups from it already — not bad!', goalId: goal2.id, authorId: bravo.id, createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000) },
+      { content: 'MAU at 9.4k. We need to hit 12k by end of month or this goal is toast. @Alpha Khan can we boost the ads budget?', goalId: goal2.id, authorId: bravo.id, createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000) },
+      { content: 'Migrated 12 services to spot instances. Bill dropped from $4,200 to $2,900 in the first week alone 🎉', goalId: goal3.id, authorId: charlie.id, createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000) },
+      { content: 'Goal complete! Final savings: 34%. We came in above target. Someone owe me a cup of cha.', goalId: goal3.id, authorId: charlie.id, createdAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000) },
+      { content: 'Dark mode shipped to prod. If you find a single white pixel that shouldn\'t be there, please don\'t tell me tonight.', goalId: goal4.id, authorId: delta.id, createdAt: new Date(Date.now() - 18 * 24 * 60 * 60 * 1000) },
+      { content: 'Only 6 CVs worth interviewing from 50 screened. The bar must go up.', goalId: goal5.id, authorId: echo.id, createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000) },
+      { content: 'Security policy docs submitted to auditor for review. Fingers crossed.', goalId: goal6.id, authorId: foxtrot.id, createdAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000) },
+      { content: 'OpenAI integration working in dev. The bot answered "who are you?" with "I am a large language model" — we need to fix the persona prompt 😂', goalId: goal7.id, authorId: golf.id, createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000) },
     ]
   })
 
-  // ── ACTION ITEMS ───────────────────────────────────────────────────────
+  // ── ACTION ITEMS — WS1 ─────────────────────────────────────────────────
   await prisma.actionItem.createMany({
     data: [
-      { title: 'Fix crash on iOS 17 login screen', priority: 'HIGH', status: 'TODO', workspaceId: w, assigneeId: arif.id, goalId: goal1.id },
-      { title: 'Write release notes for v2.0', priority: 'MEDIUM', status: 'IN_PROGRESS', workspaceId: w, assigneeId: arif.id, goalId: goal1.id },
-      { title: 'Coordinate with Apple review team', priority: 'HIGH', status: 'TODO', workspaceId: w, assigneeId: bristy.id, goalId: goal1.id },
-      { title: 'Set up Google Ads campaign', priority: 'HIGH', status: 'IN_PROGRESS', workspaceId: w, assigneeId: bristy.id, goalId: goal2.id },
-      { title: 'Schedule 5 influencer calls', priority: 'MEDIUM', status: 'TODO', workspaceId: w, assigneeId: tanvir.id, goalId: goal2.id },
-      { title: 'A/B test landing page headlines', priority: 'MEDIUM', status: 'IN_PROGRESS', workspaceId: w, assigneeId: danish.id, goalId: goal2.id },
-      { title: 'Add user data export button to settings', priority: 'HIGH', status: 'DONE', workspaceId: w, assigneeId: evan.id, goalId: goal6.id },
-      { title: 'Update cookie consent banner', priority: 'MEDIUM', status: 'DONE', workspaceId: w, assigneeId: fahim.id, goalId: goal6.id },
-      { title: 'Send offer letters to candidates', priority: 'HIGH', status: 'TODO', workspaceId: w, assigneeId: george.id, goalId: goal7.id },
-      { title: 'Optimize N+1 queries in goals endpoint', priority: 'HIGH', status: 'DONE', workspaceId: w, assigneeId: evan.id, goalId: goal5.id },
-      { title: 'Document new analytics API endpoints', priority: 'LOW', status: 'TODO', workspaceId: w, assigneeId: danish.id },
-      { title: 'Review Q3 roadmap with stakeholders', priority: 'MEDIUM', status: 'TODO', workspaceId: w, assigneeId: arif.id },
-      { title: 'Update onboarding email sequence', priority: 'LOW', status: 'DONE', workspaceId: w, assigneeId: tanvir.id, goalId: goal3.id },
-      { title: 'Set up error monitoring alerts', priority: 'MEDIUM', status: 'IN_PROGRESS', workspaceId: w, assigneeId: evan.id },
-      { title: 'Prepare Q2 retrospective slides', priority: 'LOW', status: 'TODO', workspaceId: w, assigneeId: fahim.id },
+      { title: 'Fix crash on Arabic name input (iOS)', priority: 'HIGH', status: 'DONE', workspaceId: w, assigneeId: alpha.id, goalId: goal1.id, dueDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000) },
+      { title: 'Write App Store release notes for v3.0', priority: 'MEDIUM', status: 'IN_PROGRESS', workspaceId: w, assigneeId: bravo.id, goalId: goal1.id, dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000) },
+      { title: 'Coordinate with Apple review team for expedited review', priority: 'HIGH', status: 'TODO', workspaceId: w, assigneeId: charlie.id, goalId: goal1.id, dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
+      { title: 'Set up retargeting ads on Meta', priority: 'HIGH', status: 'IN_PROGRESS', workspaceId: w, assigneeId: bravo.id, goalId: goal2.id, dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000) },
+      { title: 'Negotiate TikTok creator deals', priority: 'MEDIUM', status: 'TODO', workspaceId: w, assigneeId: echo.id, goalId: goal2.id },
+      { title: 'A/B test 3 headline variants on landing page', priority: 'MEDIUM', status: 'IN_PROGRESS', workspaceId: w, assigneeId: delta.id, goalId: goal2.id },
+      { title: 'Shut down unused staging environment', priority: 'LOW', status: 'DONE', workspaceId: w, assigneeId: charlie.id, goalId: goal3.id },
+      { title: 'Book external ISO auditor', priority: 'HIGH', status: 'TODO', workspaceId: w, assigneeId: foxtrot.id, goalId: goal6.id, dueDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000) },
+      { title: 'Run staff security training session', priority: 'MEDIUM', status: 'TODO', workspaceId: w, assigneeId: foxtrot.id, goalId: goal6.id },
+      { title: 'Fix AI bot persona prompt', priority: 'HIGH', status: 'TODO', workspaceId: w, assigneeId: golf.id, goalId: goal7.id, dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000) },
+      { title: 'Build chat UI widget', priority: 'MEDIUM', status: 'IN_PROGRESS', workspaceId: w, assigneeId: golf.id, goalId: goal7.id },
+      { title: 'Write technical assessment questions for engineers', priority: 'MEDIUM', status: 'TODO', workspaceId: w, assigneeId: echo.id, goalId: goal5.id },
+      { title: 'Send offer letters to 2 selected candidates', priority: 'HIGH', status: 'TODO', workspaceId: w, assigneeId: echo.id, goalId: goal5.id, dueDate: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000) },
+      { title: 'Update internal API docs', priority: 'LOW', status: 'TODO', workspaceId: w, assigneeId: delta.id },
+      { title: 'Prepare Q3 OKR presentation', priority: 'MEDIUM', status: 'IN_PROGRESS', workspaceId: w, assigneeId: alpha.id },
+      { title: 'Set up Sentry alerts for new error types', priority: 'MEDIUM', status: 'DONE', workspaceId: w, assigneeId: charlie.id },
+      { title: 'Migrate image CDN to Cloudflare', priority: 'LOW', status: 'TODO', workspaceId: w, assigneeId: charlie.id },
+      { title: 'Review and close stale GitHub issues', priority: 'LOW', status: 'TODO', workspaceId: w, assigneeId: golf.id },
     ]
   })
 
-  // ── ANNOUNCEMENTS ──────────────────────────────────────────────────────
+  // ── ACTION ITEMS — WS2 ─────────────────────────────────────────────────
+  await prisma.actionItem.createMany({
+    data: [
+      { title: 'Export final logo in all required formats', priority: 'HIGH', status: 'DONE', workspaceId: w2, assigneeId: bravo.id, goalId: goal8.id },
+      { title: 'Update Figma component library with new tokens', priority: 'HIGH', status: 'IN_PROGRESS', workspaceId: w2, assigneeId: charlie.id, goalId: goal8.id },
+      { title: 'Redesign landing page hero section', priority: 'MEDIUM', status: 'TODO', workspaceId: w2, assigneeId: delta.id, goalId: goal8.id },
+      { title: 'Create dark mode design variants', priority: 'MEDIUM', status: 'TODO', workspaceId: w2, assigneeId: bravo.id },
+    ]
+  })
+
+  // ── ANNOUNCEMENTS — WS1 ────────────────────────────────────────────────
   const ann1 = await prisma.announcement.create({
     data: {
-      title: '🎉 Welcome to Acme Product Team Hub!',
-      content: 'This is our central place for goals, action items, and team updates. Everyone please review your assigned action items and update statuses weekly. Let\'s build something great together!',
+      title: '🚀 Welcome to Quantum Launchpad!',
+      content: 'Assalamu Alaikum team! This is our new command centre. All goals, tasks, and announcements live here now. Please — and I cannot stress this enough — actually check it. Unlike the previous tool that shall not be named.',
       pinned: true,
-      workspaceId: w, authorId: arif.id,
+      workspaceId: w, authorId: alpha.id,
+      createdAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
     }
   })
 
   const ann2 = await prisma.announcement.create({
     data: {
-      title: 'Q2 Planning Complete — Goals Assigned',
-      content: 'We\'ve finalized our Q2 goals and assigned ownership. Please review your goals, check milestones, and reach out if you have capacity concerns. Our main focus areas are: mobile app launch, user growth, and team expansion.',
+      title: 'Q3 Goals Locked In — Let\'s Go 🎯',
+      content: 'After 3 hours of debate about what "stretch goal" actually means, we have finalized our Q3 targets. Main priorities: NeuralSync v3 launch, 25k MAU, and the AI chatbot. Owners — please review your milestones and flag any concerns before Friday.',
       pinned: true,
-      workspaceId: w, authorId: arif.id,
+      workspaceId: w, authorId: alpha.id,
+      createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
     }
   })
 
   const ann3 = await prisma.announcement.create({
     data: {
-      title: 'API Performance Improvements Shipped 🚀',
-      content: 'Evan and the backend team have completed the API optimization sprint. Response times are down ~50% on average. This should significantly improve app performance for end users.',
+      title: 'Server Costs Cut by 34% 💰',
+      content: 'Chowdhury Delta pulled off something beautiful. AWS bill is down from $4,200 to $2,780/month. That\'s $17k/year back in our pocket. Treat the man to a proper kacchi biriyani.',
       pinned: false,
-      workspaceId: w, authorId: evan.id,
+      workspaceId: w, authorId: charlie.id,
+      createdAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000),
     }
   })
 
   const ann4 = await prisma.announcement.create({
     data: {
-      title: 'GDPR Audit Passed ✅',
-      content: 'Great news — our GDPR compliance audit is complete and legal has signed off. All data handling flows are now fully compliant. Big thanks to Fahim for leading this effort.',
+      title: 'Dark Mode is LIVE 🌙',
+      content: 'After 2 years of user requests, 47 GitHub issues, and one very strongly-worded tweet — dark mode is finally here. Danish Quasar delivered. Please test it and if you find a white pixel that shouldn\'t be there, file a bug. Not a meme.',
       pinned: false,
-      workspaceId: w, authorId: fahim.id,
+      workspaceId: w, authorId: delta.id,
+      createdAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
     }
   })
 
   const ann5 = await prisma.announcement.create({
     data: {
-      title: 'New Hiring Update — 2 Offers Sent',
-      content: 'We\'ve completed technical interviews and sent offers to 2 senior engineers. Expecting responses by end of week. George will share final updates once accepted.',
+      title: 'Hiring Update — We Need Engineers Yesterday',
+      content: 'We are actively hiring 4 senior engineers. If you know anyone strong — frontend, backend, or fullstack — please refer them. Echo Rahman is leading the process. Referral bonus is still on the table.',
       pinned: false,
-      workspaceId: w, authorId: george.id,
+      workspaceId: w, authorId: echo.id,
+      createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
+    }
+  })
+
+  const ann6 = await prisma.announcement.create({
+    data: {
+      title: 'AI Chatbot Demo — Thursday 3PM 🤖',
+      content: 'Golf Neutron will be demoing the first version of our AI assistant on Thursday at 3PM. It currently thinks it\'s ChatGPT so we have some work to do, but the core integration is working. Join the call link in Slack.',
+      pinned: false,
+      workspaceId: w, authorId: golf.id,
+      createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+    }
+  })
+
+  // ── ANNOUNCEMENTS — WS2 ────────────────────────────────────────────────
+  const ann7 = await prisma.announcement.create({
+    data: {
+      title: '🎨 Rebrand Kickoff — Pixel Syndicate Assembles',
+      content: 'New workspace, new energy! The rebrand project is officially underway. Bravo Mia is leading. First deliverable: logo options by end of week. No gradients. No drop shadows. We are better than that.',
+      pinned: true,
+      workspaceId: w2, authorId: bravo.id,
+      createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
     }
   })
 
   // ── REACTIONS ──────────────────────────────────────────────────────────
   await prisma.reaction.createMany({
     data: [
-      { emoji: '🎉', announcementId: ann1.id, userId: bristy.id },
-      { emoji: '🎉', announcementId: ann1.id, userId: tanvir.id },
-      { emoji: '🎉', announcementId: ann1.id, userId: danish.id },
-      { emoji: '👍', announcementId: ann1.id, userId: evan.id },
-      { emoji: '👍', announcementId: ann1.id, userId: fahim.id },
-      { emoji: '❤️', announcementId: ann1.id, userId: george.id },
-      { emoji: '👍', announcementId: ann2.id, userId: bristy.id },
-      { emoji: '👍', announcementId: ann2.id, userId: tanvir.id },
-      { emoji: '🔥', announcementId: ann3.id, userId: arif.id },
-      { emoji: '🔥', announcementId: ann3.id, userId: danish.id },
-      { emoji: '🎉', announcementId: ann3.id, userId: bristy.id },
-      { emoji: '✅', announcementId: ann4.id, userId: arif.id },
-      { emoji: '👍', announcementId: ann4.id, userId: tanvir.id },
-      { emoji: '🎉', announcementId: ann5.id, userId: bristy.id },
+      { emoji: '🎉', announcementId: ann1.id, userId: bravo.id },
+      { emoji: '🎉', announcementId: ann1.id, userId: charlie.id },
+      { emoji: '🎉', announcementId: ann1.id, userId: delta.id },
+      { emoji: '👍', announcementId: ann1.id, userId: echo.id },
+      { emoji: '👍', announcementId: ann1.id, userId: foxtrot.id },
+      { emoji: '❤️', announcementId: ann1.id, userId: golf.id },
+      { emoji: '👍', announcementId: ann2.id, userId: bravo.id },
+      { emoji: '👍', announcementId: ann2.id, userId: charlie.id },
+      { emoji: '🔥', announcementId: ann2.id, userId: delta.id },
+      { emoji: '🔥', announcementId: ann3.id, userId: alpha.id },
+      { emoji: '🔥', announcementId: ann3.id, userId: echo.id },
+      { emoji: '🎉', announcementId: ann3.id, userId: bravo.id },
+      { emoji: '👀', announcementId: ann3.id, userId: golf.id },
+      { emoji: '🎉', announcementId: ann4.id, userId: alpha.id },
+      { emoji: '🎉', announcementId: ann4.id, userId: bravo.id },
+      { emoji: '🔥', announcementId: ann4.id, userId: foxtrot.id },
+      { emoji: '👍', announcementId: ann5.id, userId: alpha.id },
+      { emoji: '👍', announcementId: ann5.id, userId: charlie.id },
+      { emoji: '👀', announcementId: ann6.id, userId: alpha.id },
+      { emoji: '👀', announcementId: ann6.id, userId: bravo.id },
+      { emoji: '👀', announcementId: ann6.id, userId: delta.id },
+      { emoji: '🎉', announcementId: ann7.id, userId: alpha.id },
+      { emoji: '🔥', announcementId: ann7.id, userId: charlie.id },
     ]
   })
 
   // ── COMMENTS ───────────────────────────────────────────────────────────
   await prisma.comment.createMany({
     data: [
-      { content: 'So excited to finally have this! 🙌', announcementId: ann1.id, userId: bristy.id },
-      { content: 'Looking forward to a great Q2!', announcementId: ann1.id, userId: tanvir.id },
-      { content: 'Thanks for setting this up Arif bhai!', announcementId: ann1.id, userId: danish.id },
-      { content: 'Goals look great. Let\'s crush it!', announcementId: ann2.id, userId: evan.id },
-      { content: 'Happy to help with the growth goal if needed.', announcementId: ann2.id, userId: fahim.id },
-      { content: 'Amazing work on the API Evan! Noticed the difference immediately.', announcementId: ann3.id, userId: arif.id },
-      { content: 'The app feels so much snappier now 🔥', announcementId: ann3.id, userId: bristy.id },
-      { content: 'Huge thanks to Fahim bhai for handling all the legal coordination.', announcementId: ann4.id, userId: arif.id },
-      { content: 'Fingers crossed on the offers! 🤞', announcementId: ann5.id, userId: danish.id },
-      { content: 'Exciting! Can\'t wait to grow the team.', announcementId: ann5.id, userId: evan.id },
+      { content: 'Finally! Was using sticky notes before this 😭', announcementId: ann1.id, userId: bravo.id },
+      { content: 'JazakAllah khair Alpha bhai for setting this up!', announcementId: ann1.id, userId: foxtrot.id },
+      { content: 'Inshallah we crush all goals this quarter 💪', announcementId: ann1.id, userId: delta.id },
+      { content: 'The "previous tool" deserved what it got honestly', announcementId: ann1.id, userId: golf.id },
+      { content: 'Those MAU goals look spicy. We can do it though.', announcementId: ann2.id, userId: echo.id },
+      { content: 'Already updated my milestones. Let\'s go!', announcementId: ann2.id, userId: charlie.id },
+      { content: 'Chowdhury Delta you absolute wizard 🧙', announcementId: ann3.id, userId: alpha.id },
+      { content: 'And here I thought we needed a bigger budget. Nope, just needed Delta 😂', announcementId: ann3.id, userId: golf.id },
+      { content: 'I want the kacchi biriyani in writing please', announcementId: ann3.id, userId: charlie.id },
+      { content: 'FINALLY. My eyes thank you Danish Quasar 🙏', announcementId: ann4.id, userId: bravo.id },
+      { content: 'Tested on 3 phones, looks great. No rogue white pixels found.', announcementId: ann4.id, userId: foxtrot.id },
+      { content: 'Someone on Twitter is already posting screenshots. We\'re viral 👀', announcementId: ann4.id, userId: echo.id },
+      { content: 'My uni roommate is looking for a backend role, should I refer?', announcementId: ann5.id, userId: delta.id },
+      { content: 'Yes please! Send CV to Echo Rahman directly.', announcementId: ann5.id, userId: echo.id },
+      { content: 'Can the bot do my standup updates for me? Asking for a friend.', announcementId: ann6.id, userId: bravo.id },
+      { content: 'That is literally one of the features planned 😂', announcementId: ann6.id, userId: golf.id },
+      { content: 'Will the demo be recorded? I have a clash at 3PM.', announcementId: ann6.id, userId: foxtrot.id },
+      { content: 'YES will record and post in Slack after', announcementId: ann6.id, userId: golf.id },
+      { content: 'No gradients is a bold choice but I respect it', announcementId: ann7.id, userId: charlie.id },
+      { content: 'Bold choice?? It\'s 2025 Chowdhury 😭', announcementId: ann7.id, userId: bravo.id },
     ]
   })
 
   console.log('✅ Seed complete!')
-  console.log('Users: a@a.com, b@b.com, c@c.com, d@d.com, e@e.com, f@f.com, g@g.com')
-  console.log('Password for all: pass')
-  console.log('Admin: a@a.com')
+  console.log('')
+  console.log('─────────────────────────────')
+  console.log('  Users (password: pass)')
+  console.log('─────────────────────────────')
+  console.log('  a@a.com — Alpha Khan (ADMIN, Quantum Launchpad)')
+  console.log('  b@b.com — Bravo Mia (ADMIN, Pixel Syndicate)')
+  console.log('  c@c.com — Chowdhury Delta')
+  console.log('  d@d.com — Danish Quasar')
+  console.log('  e@e.com — Echo Rahman')
+  console.log('  f@f.com — Foxtrot Hossain')
+  console.log('  g@g.com — Golf Neutron')
+  console.log('─────────────────────────────')
+  console.log('  Workspaces:')
+  console.log('  • Quantum Launchpad (violet) — 7 members')
+  console.log('  • Pixel Syndicate (blue) — 4 members')
+  console.log('─────────────────────────────')
 }
 
 main()
