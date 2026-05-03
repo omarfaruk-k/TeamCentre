@@ -15,8 +15,8 @@
 
 | Service | URL |
 |---------|-----|
-| **Web App** | https://your-web.up.railway.app |
-| **API** | https://your-api.up.railway.app |
+| **Web App** | https://teamcentre.up.railway.app |
+| **API** | https://teamcentre-backedend.up.railway.app |
 
 **Demo accounts — ready to explore, no sign-up needed:**
 ```
@@ -104,7 +104,7 @@ team-hub/
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/your-username/team-hub.git
+git clone https://github.com/omarfaruk-k/TeamCentre
 cd team-hub
 npm install
 ```

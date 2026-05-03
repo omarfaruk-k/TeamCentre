@@ -4,6 +4,7 @@ import prisma from '../lib/prisma.js'
 import { signAccess, signRefresh, verifyAccess, verifyRefresh } from '../lib/jwt.js'
 import { authenticate } from '../middleware/authenticate.js'
 import { sendOtpEmail } from '../lib/mailer.js'
+import crypto from 'crypto'
 
  
 const router = express.Router()
@@ -123,24 +124,15 @@ if (mode === 'verify' && user.emailVerified)
       return res.json({ message: 'Email verified' })
     }
  
-    if (mode === 'reset') {
-      // Clear OTP but don't log in yet — frontend sends to /reset-password
-      // We issue a short-lived reset token (just reuse the OTP cleared state as signal)
-      // Simple approach: generate a reset token stored on user
-      const resetToken = require('crypto').randomBytes(32).toString('hex')
-      await prisma.user.update({
-        where: { id: user.id },
-        data: {
-          otpCode: null,
-          otpExpiry: null,
-          otpAttempts: 0,
-          // Reuse otpCode field to store reset token temporarily
-          // (or add a resetToken field — see note below)
-        },
-      })
-      // Return reset token to frontend — it passes it to /reset-password
-      return res.json({ resetToken, message: 'Code verified' })
-    }
+if (mode === 'reset') {
+  const resetToken = crypto.randomBytes(32).toString('hex')
+  resetTokens.set(email, { token: resetToken, expiry: Date.now() + 15 * 60 * 1000 })
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { otpCode: null, otpExpiry: null, otpAttempts: 0 },
+  })
+  return res.json({ resetToken, message: 'Code verified' })
+}
   } catch (err) {
     console.error(err)
     res.status(500).json({ error: 'Server error' })

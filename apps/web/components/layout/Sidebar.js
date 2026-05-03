@@ -45,9 +45,16 @@ export default function Sidebar({ isOpen, onClose }) {
       <div className="px-4 h-12 flex items-center shrink-0"
         style={{ borderBottom: '1px solid var(--border)' }}>
 <Link href="/">
-  <span className="font-bold text-base tracking-tight" style={{ color: 'var(--text-primary)' }}>
-    Team Hub
-  </span>
+  <img
+    src="/logo-dark.svg"
+    alt="TeamCentre"
+    className="h-10 w-auto object-contain logo-dark"
+  />
+  <img
+    src="/logo-light.svg"
+    alt="TeamCentre"
+    className="h-10 w-auto object-contain logo-light"
+  />
 </Link>
       </div>
 
@@ -89,6 +96,18 @@ onMouseLeave={e => {
           )
         })}
       </nav>
+      {/* Workspace description */}
+{active?.description && (
+  <div className="px-3 py-2 mx-2 mb-2 rounded-lg shrink-0"
+    style={{ backgroundColor: `${accent}10`, border: `1px solid ${accent}25` }}>
+    <p className="text-xs font-medium mb-0.5" style={{ color: accent }}>
+      {active.name}
+    </p>
+    <p className="text-xs leading-relaxed" style={{ color: 'var(--text3)' }}>
+      {active.description}
+    </p>
+  </div>
+)}
 
       {/* Bottom — user menu */}
       <div className="p-2 shrink-0" style={{ borderTop: '1px solid var(--border)' }}>

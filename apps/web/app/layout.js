@@ -14,6 +14,18 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "TeamCentre",
   description: "Stay aligned. Move forward",
+    icons: {
+    icon: [
+      {
+        url: '/10.svg',
+        media: '(prefers-color-scheme: light)',
+      },
+      {
+        url: '/9.svg',
+        media: '(prefers-color-scheme: dark)',
+      },
+    ],
+  },
 };
 
 export default function RootLayout({ children }) {

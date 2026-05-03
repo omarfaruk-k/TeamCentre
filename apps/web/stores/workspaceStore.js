@@ -29,9 +29,13 @@ export const useWorkspaceStore = create((set, get) => ({
     const workspace = found || list[0]
     set({ active: workspace, role: workspace.role })
   },
+  deleteWorkspace: async (id) => {
+  await api.delete(`/workspaces/${id}`)
+  set((s) => ({ workspaces: s.workspaces.filter((w) => w.id !== id) }))
+},
 
-  createWorkspace: async (name, accentColor) => {
-    const res = await api.post('/workspaces', { name, accentColor })
+  createWorkspace: async (name, accentColor, description) => {
+    const res = await api.post('/workspaces', { name, accentColor, description })
     set((s) => ({ workspaces: [...s.workspaces, res.data] }))
     return res.data
   },

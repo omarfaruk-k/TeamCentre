@@ -15,6 +15,7 @@ function VerifyOtpInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const email = searchParams.get('email') || ''
+  const mode = searchParams.get('mode') || 'verify'
 
   useEffect(() => {
     if (countdown <= 0) return
@@ -78,8 +79,12 @@ function VerifyOtpInner() {
     setLoading(true)
     setError('')
     try {
-      await api.post('/auth/verify-otp', { email, otp })
-      router.push('/dashboard')
+const res = await api.post('/auth/verify-otp', { email, otp, mode })
+if (mode === 'reset') {
+  router.push(`/reset-password?email=${encodeURIComponent(email)}&token=${res.data.resetToken}`)
+} else {
+  router.push('/dashboard')
+}
     } catch (err) {
       setError(err.response?.data?.error || 'Invalid or expired code')
       setDigits(['', '', '', '', '', ''])
@@ -93,7 +98,7 @@ function VerifyOtpInner() {
     setResending(true)
     setError('')
     try {
-      await api.post('/auth/resend-otp', { email })
+      await api.post('/auth/resend-otp', { email, mode })
       setResent(true)
       setCountdown(60)
       setDigits(['', '', '', '', '', ''])

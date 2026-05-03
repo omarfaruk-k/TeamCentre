@@ -8,12 +8,13 @@ const router = Router()
 
 // Create workspace
 router.post('/', authenticate, async (req, res) => {
-  const { name, accentColor } = req.body
+  const { name, accentColor, description } = req.body
   if (!name) return res.status(400).json({ error: 'Name required' })
   const workspace = await prisma.workspace.create({
     data: {
       name,
       accentColor: accentColor || '#7C3AED',
+      description: description || null,
       members: { create: { userId: req.user.id, role: 'ADMIN' } }
     },
     include: { members: true }
@@ -42,17 +43,18 @@ router.get('/:workspaceId', authenticate, async (req, res) => {
 
 // Update workspace (admin only)
 router.patch('/:workspaceId', authenticate, requireRole('ADMIN'), async (req, res) => {
-  const { name, accentColor } = req.body
+  const { name, accentColor, description } = req.body
   const workspace = await prisma.workspace.update({
     where: { id: req.params.workspaceId },
-    data: { ...(name && { name }), ...(accentColor && { accentColor }) }
+    data: { ...(name && { name }), ...(accentColor && { accentColor }), ...(description !== undefined && { description }) }
   })
   res.json(workspace)
 })
 
 // Delete workspace (admin only)
 router.delete('/:workspaceId', authenticate, requireRole('ADMIN'), async (req, res) => {
-  await prisma.workspace.delete({ where: { id: req.params.workspaceId } })
+  await prisma.workspaceMember.deleteMany({ where: { workspaceId: req.params.workspaceId } })
+await prisma.workspace.delete({ where: { id: req.params.workspaceId } })
   res.json({ ok: true })
 })
 
