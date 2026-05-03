@@ -7,6 +7,7 @@ import { useWorkspaceAccent } from '../../hooks/useWorkspaceAccent'
 import Sidebar from '../../components/layout/Sidebar'
 import TopNav from '../../components/layout/TopNav'
 import { useSocket } from '../../hooks/useSocket'
+import { useTheme } from '../../hooks/useTheme'
 
 export default function DashboardLayout({ children }) {
   const { user, loading, fetchMe } = useAuthStore()
@@ -17,6 +18,7 @@ export default function DashboardLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => { fetchMe() }, [])
+  useTheme()
 
   useEffect(() => {
     if (!loading && !user) { router.push('/login'); return }
@@ -59,13 +61,5 @@ return (
     </div>
   </div>
 )
-  // return (
-  //   <div className="flex h-screen overflow-hidden" style={{ backgroundColor: 'var(--bg-main)', color: 'var(--text-primary)' }}>
-  //     <Sidebar />
-  //     <div className="flex-1 flex flex-col overflow-hidden">
-  //       <TopNav />
-  //       <main className="flex-1 overflow-y-auto p-6 dotted-bg">{children}</main>
-  //     </div>
-  //   </div>
-  // )
+
 }

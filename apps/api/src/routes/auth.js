@@ -13,6 +13,7 @@ cloudinary.config({
 
 const router = Router()
 
+
 const cookieOpts = {
   httpOnly: true,
   sameSite: 'none',
@@ -78,24 +79,35 @@ router.get('/me', async (req, res) => {
     res.status(401).json({ error: 'Invalid token' })
   }
 })
-
 router.patch('/me', async (req, res) => {
   const token = req.cookies?.accessToken
   if (!token) return res.status(401).json({ error: 'Not authenticated' })
   try {
-    // const { verifyAccess } = await import('../lib/jwt.js')
     const payload = verifyAccess(token)
-    const { name, avatarUrl } = req.body
+    const { name, avatarUrl, email } = req.body
+
+    // check email not taken if changing
+    if (email) {
+      const existing = await prisma.user.findUnique({ where: { id: payload.id }, select: { email: true } })
+      if (email !== existing.email) {
+        const taken = await prisma.user.findUnique({ where: { email } })
+        if (taken) return res.status(409).json({ error: 'Email already in use' })
+      }
+    }
+
     const user = await prisma.user.update({
       where: { id: payload.id },
-      data: { ...(name && { name }), ...(avatarUrl && { avatarUrl }) }
+      data: {
+        ...(name && { name }),
+        ...(avatarUrl && { avatarUrl }),
+        ...(email && { email })
+      }
     })
     res.json({ id: user.id, name: user.name, email: user.email, avatarUrl: user.avatarUrl })
   } catch {
     res.status(401).json({ error: 'Invalid token' })
   }
 })
-
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
