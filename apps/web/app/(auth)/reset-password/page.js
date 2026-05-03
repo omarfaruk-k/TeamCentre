@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import api from '../../../lib/api'
 import Link from 'next/link'
@@ -13,7 +13,7 @@ function getPasswordStrength(password) {
   return score
 }
 
-export default function ResetPasswordPage() {
+function ResetPasswordInner() {
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -85,7 +85,6 @@ export default function ResetPasswordPage() {
 
         <div className="p-8">
 
-          {/* Logo */}
           <div className="flex flex-col items-center mb-8">
             <div className="mb-4 h-20 flex items-center justify-center">
               <picture>
@@ -111,7 +110,6 @@ export default function ResetPasswordPage() {
             </p>
           </div>
 
-          {/* Error */}
           {error && (
             <div
               className="flex items-center gap-2 text-xs px-3 py-2.5 rounded-lg mb-5"
@@ -124,7 +122,6 @@ export default function ResetPasswordPage() {
             </div>
           )}
 
-          {/* Success */}
           {done ? (
             <div
               className="flex flex-col items-center gap-3 py-6 px-3 rounded-lg text-center"
@@ -139,7 +136,6 @@ export default function ResetPasswordPage() {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
 
-              {/* New password */}
               <div className="space-y-1.5">
                 <label className="text-xs font-medium tracking-wide" style={{ color: 'var(--text2)' }}>
                   New password
@@ -171,7 +167,6 @@ export default function ResetPasswordPage() {
                   </button>
                 </div>
 
-                {/* Strength bar */}
                 {password.length > 0 && (
                   <div>
                     <div className="flex gap-1 mt-1.5">
@@ -188,7 +183,6 @@ export default function ResetPasswordPage() {
                 )}
               </div>
 
-              {/* Confirm password */}
               <div className="space-y-1.5">
                 <label className="text-xs font-medium tracking-wide" style={{ color: 'var(--text2)' }}>
                   Confirm password
@@ -259,5 +253,19 @@ export default function ResetPasswordPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg)' }}>
+        <svg className="animate-spin" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ color: 'var(--accent)' }}>
+          <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+        </svg>
+      </div>
+    }>
+      <ResetPasswordInner />
+    </Suspense>
   )
 }
