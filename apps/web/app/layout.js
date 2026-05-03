@@ -12,8 +12,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Team Hub",
-  description: "Your team workspace",
+  title: "TeamCentre",
+  description: "Stay aligned. Move forward",
 };
 
 export default function RootLayout({ children }) {

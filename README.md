@@ -1,8 +1,8 @@
-# Team Hub
+# TeamCentre
 
-> A collaborative workspace for teams to manage goals, track action items, and stay aligned — in real time.
+> A real-time collaborative workspace for teams to manage goals, track action items, and stay aligned.
 
-![Next.js](https://img.shields.io/badge/Next.js_14-black?style=flat-square&logo=next.js)
+![Next.js](https://img.shields.io/badge/Next.js_16-black?style=flat-square&logo=next.js)
 ![Express](https://img.shields.io/badge/Express.js-grey?style=flat-square&logo=express)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-blue?style=flat-square&logo=postgresql&logoColor=white)
 ![Socket.io](https://img.shields.io/badge/Socket.io-010101?style=flat-square&logo=socket.io)
@@ -18,23 +18,24 @@
 | **Web App** | https://your-web.up.railway.app |
 | **API** | https://your-api.up.railway.app |
 
-**Demo account** — ready to explore, no sign-up needed:
+**Demo accounts — ready to explore, no sign-up needed:**
 ```
-Email:    b@b.com, c@c.com, d@d.com
-Password for all: pass
+Email:    b@b.com / c@c.com / d@d.com
+Password: pass
 ```
 
 ---
 
 ## What It Does
 
-Team Hub gives teams a single shared space to:
+TeamCentre gives teams a single shared space to:
 
-- **Set goals** with milestones, owners, due dates, and a live progress feed
-- **Post announcements** with rich-text formatting, emoji reactions, and threaded comments
-- **Track action items** on a drag-and-drop Kanban board or a sortable list view
-- **Stay in sync** — Socket.io pushes every update live, and the sidebar shows who's online right now
-- **Analyse progress** — a dashboard with stats cards and a goal completion chart, plus a one-click CSV export
+- **Set and track goals** with milestones, progress bars, owners, due dates, and a live activity feed
+- **Manage action items** on a drag-and-drop Kanban board or sortable list view
+- **Post announcements** with emoji reactions, threaded comments, and pinning
+- **Stay in sync** — Socket.io pushes every update live across all open sessions
+- **Get notified** — in-app and email notifications for mentions, assignments, and workspace events
+- **Analyse progress** — dashboard with stats cards, area charts, donut charts, and CSV export
 
 ---
 
@@ -43,14 +44,15 @@ Team Hub gives teams a single shared space to:
 | Layer | Technology |
 |-------|-----------|
 | Monorepo | [Turborepo](https://turbo.build/) |
-| Frontend | [Next.js 14](https://nextjs.org/) — App Router, JavaScript |
-| Styling | [Tailwind CSS](https://tailwindcss.com/) |
+| Frontend | [Next.js 16](https://nextjs.org/) — App Router, JavaScript |
+| Styling | [Tailwind CSS v4](https://tailwindcss.com/) + CSS variables |
 | State management | [Zustand](https://zustand-demo.pmnd.rs/) |
 | Backend | [Node.js](https://nodejs.org/) + [Express.js](https://expressjs.com/) |
 | Database | [PostgreSQL](https://www.postgresql.org/) + [Prisma ORM](https://www.prisma.io/) |
 | Auth | JWT — access (15 min) + refresh (7 d) tokens in `httpOnly` cookies |
 | Real-time | [Socket.io](https://socket.io/) |
 | File storage | [Cloudinary](https://cloudinary.com/) — avatar uploads |
+| Email | [Nodemailer](https://nodemailer.com/) — SMTP via Gmail |
 | Deployment | [Railway](https://railway.app/) — frontend & backend as separate services |
 
 ---
@@ -60,35 +62,28 @@ Team Hub gives teams a single shared space to:
 ```
 team-hub/
 ├── apps/
-│   ├── web/                        # Next.js 14 frontend
+│   ├── web/                        # Next.js frontend
 │   │   ├── app/
-│   │   │   ├── (auth)/             # /login  /register
+│   │   │   ├── (auth)/             # login, register, OTP, forgot/reset password
 │   │   │   └── (dashboard)/        # all protected pages
 │   │   ├── components/
-│   │   │   ├── ui/                 # Button, Card, Modal, Badge, Toast …
-│   │   │   ├── layout/             # Sidebar, TopNav, WorkspaceSwitcher
-│   │   │   ├── goals/              # GoalCard, GoalForm, MilestoneList, ActivityFeed
-│   │   │   ├── action-items/       # KanbanBoard, ActionItemCard, ActionItemForm
-│   │   │   ├── announcements/      # AnnouncementCard, AnnouncementForm, ReactionBar
-│   │   │   └── dashboard/          # StatsCard, GoalCompletionChart
-│   │   ├── stores/                 # Zustand — authStore, workspaceStore, goalStore …
-│   │   ├── hooks/                  # useSocket, useWorkspaceAccent, useOnlineMembers
-│   │   └── lib/                    # axios instance, socket.io client, utilities
+│   │   │   └── layout/             # Sidebar, TopNav, WorkspaceSwitcher, UserMenu
+│   │   ├── stores/                 # Zustand — auth, workspace, goal, actionItem,
+│   │   │                           #           announcement, notification
+│   │   ├── hooks/                  # useSocket, useWorkspaceAccent, useOnlineMembers,
+│   │   │                           # useTheme
+│   │   └── lib/                    # axios instance, socket.io client
 │   │
 │   └── api/                        # Express REST API
 │       ├── src/
-│       │   ├── routes/             # auth, workspaces, goals, announcements, actionItems …
-│       │   ├── middleware/         # authenticate.js, requireRole.js, errorHandler.js
-│       │   ├── controllers/        # one file per route group
-│       │   ├── services/           # business logic called by controllers
-│       │   ├── lib/                # prisma.js, jwt.js, cloudinary.js
-│       │   └── sockets/            # workspaceSocket.js — all Socket.io handlers
+│       │   ├── routes/             # auth, workspaces, goals, announcements,
+│       │   │                       # actionItems, notifications, analytics
+│       │   ├── middleware/         # authenticate.js, requireRole.js
+│       │   ├── lib/                # prisma.js, jwt.js, notify.js, mailer.js
+│       │   └── sockets/            # workspaceSocket.js
 │       └── prisma/
 │           ├── schema.prisma
 │           └── seed.js
-│
-├── packages/
-│   └── shared/                     # shared enums and constants
 │
 ├── turbo.json
 ├── package.json
@@ -102,42 +97,37 @@ team-hub/
 ### Prerequisites
 
 - Node.js ≥ 18
-- PostgreSQL running locally (or a connection string to a hosted instance)
+- PostgreSQL running locally
 - A free [Cloudinary](https://cloudinary.com/) account
+- A Gmail account with an [App Password](https://support.google.com/accounts/answer/185833) for email
 
 ### 1. Clone and install
 
 ```bash
 git clone https://github.com/your-username/team-hub.git
 cd team-hub
-npm install          # installs all workspaces via Turborepo
+npm install
 ```
 
 ### 2. Set up environment variables
 
-Copy the example files and fill in your values:
-
 ```bash
-cp apps/api/.env.example      apps/api/.env
-cp apps/web/.env.example      apps/web/.env.local
+cp apps/api/.env.example   apps/api/.env
+cp apps/web/.env.example   apps/web/.env.local
 ```
-
-See the [Environment Variables](#environment-variables) section below for every key and what it does.
 
 ### 3. Set up the database
 
 ```bash
 cd apps/api
-npx prisma migrate dev --name init     # creates tables
-npx prisma db seed                     # seeds demo account + sample data
+npx prisma migrate dev --name init
+npx prisma db seed
 ```
 
 ### 4. Run the dev servers
 
-From the repo root:
-
 ```bash
-npm run dev      # starts both apps concurrently via Turborepo
+npm run dev
 ```
 
 | App | URL |
@@ -156,12 +146,14 @@ npm run dev      # starts both apps concurrently via Turborepo
 | `DATABASE_URL` | ✅ | PostgreSQL connection string |
 | `JWT_ACCESS_SECRET` | ✅ | Secret for signing access tokens |
 | `JWT_REFRESH_SECRET` | ✅ | Secret for signing refresh tokens |
-| `JWT_ACCESS_EXPIRES` | ✅ | Access token lifetime (e.g. `15m`) |
-| `JWT_REFRESH_EXPIRES` | ✅ | Refresh token lifetime (e.g. `7d`) |
+| `JWT_ACCESS_EXPIRES` | ✅ | Access token lifetime e.g. `15m` |
+| `JWT_REFRESH_EXPIRES` | ✅ | Refresh token lifetime e.g. `7d` |
 | `CLOUDINARY_CLOUD_NAME` | ✅ | From your Cloudinary dashboard |
 | `CLOUDINARY_API_KEY` | ✅ | From your Cloudinary dashboard |
 | `CLOUDINARY_API_SECRET` | ✅ | From your Cloudinary dashboard |
-| `CLIENT_URL` | ✅ | Frontend origin for CORS (e.g. `http://localhost:3000`) |
+| `CLIENT_URL` | ✅ | Frontend origin for CORS |
+| `MAIL_USER` | ✅ | Gmail address for sending emails |
+| `MAIL_PASS` | ✅ | Gmail app password |
 | `PORT` | — | Defaults to `4000` |
 
 ### Frontend — `apps/web/.env.local`
@@ -169,99 +161,133 @@ npm run dev      # starts both apps concurrently via Turborepo
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `NEXT_PUBLIC_API_URL` | ✅ | Base URL of the Express API |
-| `NEXT_PUBLIC_SOCKET_URL` | ✅ | Socket.io server URL (usually the same as the API URL) |
+| `NEXT_PUBLIC_SOCKET_URL` | ✅ | Socket.io server URL |
 
 ---
 
-## Advanced Features
+## Features
 
-Two advanced features were implemented for this submission:
+### 🔐 Authentication
+- Email + password registration and login
+- Email verification via 6-digit OTP (10 min expiry, 5 attempt limit, 60s resend cooldown)
+- Forgot password → OTP → reset password flow
+- JWT access (15 min) + refresh (7 day) tokens in `httpOnly` cookies
+- Transparent token refresh via axios interceptor — users are never interrupted mid-session
+- Password strength indicator on register
+- Show/hide password toggle
 
-### ⚡ 2. Optimistic UI
+### 🏢 Workspaces
+- Multi-workspace support — users can belong to multiple workspaces
+- Role-based access control — Admin and Member roles
+- Custom accent colour per workspace — themes the entire interface
+- Invite members by email, change roles, remove members
+- Workspace persistence across page reloads via localStorage
 
-Every user action feels instant — the UI updates immediately before the server responds.
+### 🎯 Goals
+- Create goals with title, description, status, due date, and owner
+- Four statuses — On Track, At Risk, Completed, Cancelled
+- Milestones with checkbox completion — automatically recalculates goal progress
+- Progress bar updated in real-time via Socket.io
+- Activity feed — post progress updates with @mention support
+- Linked action items shown in goal detail sidebar
+- Admin can edit and delete goals
 
-- **Kanban drag-and-drop** — cards move to the new column at once; if the API call fails, the card snaps back
-- **Emoji reactions** — toggling a reaction is reflected immediately in the count
-- **Milestone toggles** — checked/unchecked state updates without a loading delay
-- **New action items** — appear in the list right away with a subtle "saving…" indicator
+### 📋 Action Items
+- Drag-and-drop Kanban board — To Do, In Progress, Done
+- List view alternative with sortable columns
+- Priority levels — High, Medium, Low
+- Assignee, due date, and goal linking
+- Real-time card updates across all sessions via Socket.io
 
-The pattern is consistent across all Zustand stores: save a snapshot → apply optimistic update → on error, restore snapshot and show a toast.
+### 📢 Announcements
+- Admin-only posting with title and content
+- Pin important announcements to the top
+- Emoji reactions — 👍 ❤️ 🎉 🔥 👀
+- Threaded comments with @mention support
+- Side-by-side layout — announcement content left, comments right
+- Mobile: comments toggle on/off below the announcement
 
-```js
-// Example from actionItemStore.js
-moveItem: (id, newStatus) => {
-  const snapshot = get().items
-  set(state => ({
-    items: state.items.map(i => i.id === id ? { ...i, status: newStatus } : i)
-  }))
-  api.patch(`/action-items/${id}`, { status: newStatus }).catch(() => {
-    set({ items: snapshot })
-    toast.error('Failed to update. Please try again.')
-  })
-}
-```
+### 🔔 Notifications
+- In-app notification bell with unread count badge
+- Real-time delivery via Socket.io user rooms
+- Email notifications via Nodemailer for:
+  - Workspace invitations
+  - @mentions in comments and goal updates
+  - Goal ownership assignment
+  - Goal status changes
+  - Action item assignments
+- Mark all as read, click to navigate to relevant page
 
-### 🔐 4. Advanced RBAC
+### 📊 Dashboard & Analytics
+- Stats cards — total goals, completed this week, overdue goals, open action items
+- Goal completion area chart — 8-week trend
+- Goal status donut chart
+- Action item status donut chart
+- Overdue items panel
+- Recent activity feed
+- Active goals with inline progress bars
+- Recent announcements preview
+- CSV export (admin only)
 
-A permission matrix enforced on both the backend (middleware) and frontend (hidden UI elements — not just disabled buttons).
+### 👥 Members
+- Member list with online presence indicators
+- Invite by email, change role, remove member
+- Online now panel showing currently active members
+- Real-time online/offline status via Socket.io
 
-| Action | Admin | Member |
-|--------|:-----:|:------:|
-| Edit workspace settings | ✅ | ❌ |
-| Invite / remove members | ✅ | ❌ |
-| Change member roles | ✅ | ❌ |
-| Post / pin / delete announcements | ✅ | ❌ |
-| Delete goals or action items | ✅ | ❌ |
-| Export CSV | ✅ | ❌ |
-| Create / edit goals & milestones | ✅ | ✅ |
-| Create / update action items | ✅ | ✅ |
-| React & comment on announcements | ✅ | ✅ |
-| View analytics dashboard | ✅ | ✅ |
-
-Backend uses a `requireRole` middleware that checks the `WorkspaceMember` table on every protected route. Frontend reads the current member's role from `workspaceStore` and conditionally renders admin-only controls.
+### 🎨 UI & Experience
+- Dark/light theme toggle with system preference detection on first load
+- Live theme sync — follows OS preference changes unless manually overridden
+- Workspace accent colour applied globally via CSS custom properties
+- SVG logo with automatic dark/light variant switching
+- Dotted background with accent glow orbs on auth pages
+- Full mobile responsiveness — sidebar drawer, horizontal Kanban scroll, stacked layouts
+- Lucide icons throughout
 
 ---
 
 ## Key Design Decisions
 
-### Workspace accent colour
+### CSS variable theming
+All colours are CSS custom properties. Switching workspaces or toggling dark/light mode updates variables on `<html>` — every component reacts instantly with no re-renders.
 
-Each workspace has a custom accent colour (violet, blue, teal, rose, amber, or slate). Switching workspaces re-themes the entire interface — the sidebar tint, active nav highlight, button colours, focus rings, and top nav border all update via CSS custom properties set by the `useWorkspaceAccent` hook.
-
-```js
-document.documentElement.style.setProperty('--accent', accentColor)
-document.documentElement.style.setProperty('--accent-subtle', accentColor + '10')
-document.documentElement.style.setProperty('--accent-muted',  accentColor + '20')
-```
-
-### Auth flow
-
-Access tokens (15 min) and refresh tokens (7 days) are stored in `httpOnly` cookies — never in `localStorage`. The axios instance has an interceptor that transparently calls `/auth/refresh` on any 401 and retries the original request, so users are never interrupted mid-session.
-
-### Real-time events
-
-Every write operation in the API emits a Socket.io event to the relevant workspace room. The frontend `useSocket` hook subscribes to these events and updates Zustand stores directly, so all open tabs and all connected users see changes without refreshing.
+### Real-time architecture
+One persistent Socket.io connection per user session. All write operations emit to the relevant workspace room. The `useSocket` hook subscribes once in `DashboardLayout` and updates Zustand stores directly.
 
 | Event | Trigger |
 |-------|---------|
 | `announcement:created` | New announcement posted |
 | `reaction:updated` | Emoji added or removed |
-| `comment:created` | New comment on an announcement |
-| `goal:updated` | Goal status, milestones, or updates changed |
-| `actionItem:updated` | Action item moved or edited |
-| `member:online / offline` | Member connects or disconnects |
-| `notification:new` | @mention triggered (user-specific room) |
+| `comment:created` | New comment |
+| `goal:updated` | Milestone toggled, progress recalculated |
+| `goal:update:added` | New activity posted |
+| `actionItem:updated` | Item moved or edited |
+| `member:online/offline` | Member connects or disconnects |
+| `notification:new` | User-specific notification (own socket room) |
+
+### Optimistic UI
+Every user action feels instant. The pattern across all Zustand stores: save snapshot → apply optimistic update → on error, restore snapshot.
+
+### RBAC
+Permission matrix enforced on both backend (`requireRole` middleware checking `WorkspaceMember` table) and frontend (admin-only UI elements hidden, not just disabled).
+
+| Action | Admin | Member |
+|--------|:-----:|:------:|
+| Invite / remove members | ✅ | ❌ |
+| Change member roles | ✅ | ❌ |
+| Post / pin / delete announcements | ✅ | ❌ |
+| Delete goals or action items | ✅ | ❌ |
+| Export CSV | ✅ | ❌ |
+| Edit goals and milestones | ✅ | ✅ |
+| Create / update action items | ✅ | ✅ |
+| React and comment | ✅ | ✅ |
+| View dashboard | ✅ | ✅ |
 
 ---
 
 ## API Endpoints
 
-All routes are prefixed with `/api`. The `:id` segments are path parameters 
-sent in the HTTP request — these are **not** frontend page URLs.
-Frontend pages are flat: `/goals`, `/announcements`, `/action-items`, etc.
-The active workspace ID is passed to the API via the request path, resolved 
-from Zustand's `workspaceStore` on the client.
+All routes prefixed with `/api`.
 
 | Resource | Base path |
 |----------|-----------|
@@ -273,30 +299,20 @@ from Zustand's `workspaceStore` on the client.
 | Action Items | `/api/workspaces/:id/action-items` |
 | Members | `/api/workspaces/:id/members` |
 | Analytics | `/api/workspaces/:id/analytics` |
+| Notifications | `/api/notifications` |
 
 ---
 
 ## Deployment (Railway)
 
-The project deploys as two separate Railway services inside one Railway project, sharing a single PostgreSQL plugin.
-
-1. Create a new Railway project and add a **PostgreSQL** plugin — `DATABASE_URL` is injected automatically.
-2. Add a service for `apps/api` and set the root directory to `apps/api`.
-3. Add a service for `apps/web` and set the root directory to `apps/web`.
-4. Set all environment variables in each service's variable panel (see table above).
-5. After the first deploy, run the seed script once via Railway's shell:
-   ```bash
-   npx prisma db seed
-   ```
-
----
-
-## Known Limitations
-
-- **Search** — the global search bar in the top nav is UI-only in the current version; full-text search across goals and announcements is planned.
-- **@Mention notifications** — in-app notification badges are fully wired; email delivery via Nodemailer is not yet configured.
-- **Attachment uploads** — Cloudinary integration covers avatar uploads; file attachments on action items are not yet implemented.
-- **Offline support** — there is no service worker or write queue; the app requires an active internet connection.
+1. Create a Railway project and add a **PostgreSQL** plugin
+2. Add a service for `apps/api` — set root directory to `apps/api`
+3. Add a service for `apps/web` — set root directory to `apps/web`
+4. Set all environment variables in each service's variable panel
+5. After first deploy, run the seed script via Railway shell:
+```bash
+npx prisma db seed
+```
 
 ---
 
