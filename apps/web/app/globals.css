@@ -84,6 +84,7 @@ html, body {
   opacity: 1;
 }
 
+
 /* ── Cards ── */
 .card         { @apply rounded-[var(--radius-lg)] overflow-hidden; background: var(--bg2); border: 1px solid var(--border); }
 .card-header  { @apply flex items-center justify-between px-4 py-3.5; border-bottom: 1px solid var(--border); }
