@@ -1,10 +1,10 @@
 'use client'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import api from '../../../lib/api'
 import Link from 'next/link'
 
-export default function VerifyOtpPage() {
+function VerifyOtpInner() {
   const [digits, setDigits] = useState(['', '', '', '', '', ''])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -16,7 +16,6 @@ export default function VerifyOtpPage() {
   const searchParams = useSearchParams()
   const email = searchParams.get('email') || ''
 
-  // Countdown timer for resend
   useEffect(() => {
     if (countdown <= 0) return
     const t = setTimeout(() => setCountdown(c => c - 1), 1000)
@@ -28,19 +27,16 @@ export default function VerifyOtpPage() {
   }
 
   const handleChange = (index, value) => {
-    // Only allow digits
     const digit = value.replace(/\D/g, '').slice(-1)
     const next = [...digits]
     next[index] = digit
     setDigits(next)
     setError('')
 
-    // Auto-advance
     if (digit && index < 5) {
       focusInput(index + 1)
     }
 
-    // Auto-submit when all filled
     if (digit && index === 5) {
       const code = [...next].join('')
       if (code.length === 6) handleVerify(code)
@@ -50,12 +46,10 @@ export default function VerifyOtpPage() {
   const handleKeyDown = (index, e) => {
     if (e.key === 'Backspace') {
       if (digits[index]) {
-        // Clear current
         const next = [...digits]
         next[index] = ''
         setDigits(next)
       } else if (index > 0) {
-        // Move back
         focusInput(index - 1)
         const next = [...digits]
         next[index - 1] = ''
@@ -88,7 +82,6 @@ export default function VerifyOtpPage() {
       router.push('/dashboard')
     } catch (err) {
       setError(err.response?.data?.error || 'Invalid or expired code')
-      // Shake + clear on error
       setDigits(['', '', '', '', '', ''])
       setTimeout(() => focusInput(0), 50)
     } finally {
@@ -120,16 +113,13 @@ export default function VerifyOtpPage() {
       className="min-h-screen flex items-center justify-center relative overflow-hidden"
       style={{ backgroundColor: 'var(--bg)' }}
     >
-      {/* Dotted background */}
       <div className="absolute inset-0 dotted-bg opacity-60" />
 
-      {/* Glow orbs */}
       <div
         className="absolute top-[-80px] left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full blur-[140px] pointer-events-none"
         style={{ backgroundColor: 'var(--accent)', opacity: 0.06 }}
       />
 
-      {/* Card */}
       <div
         className="relative w-full max-w-sm mx-4 rounded-2xl overflow-hidden"
         style={{
@@ -138,15 +128,12 @@ export default function VerifyOtpPage() {
           boxShadow: '0 0 0 1px var(--border), 0 32px 64px rgba(0,0,0,0.4)',
         }}
       >
-        {/* Top accent line */}
         <div
           className="h-[2px] w-full"
           style={{ background: 'linear-gradient(90deg, transparent, var(--accent), transparent)' }}
         />
 
         <div className="p-8">
-
-          {/* Logo */}
           <div className="flex flex-col items-center mb-8">
             <div className="mb-4 h-20 w-auto flex items-center justify-center">
               <picture>
@@ -160,7 +147,6 @@ export default function VerifyOtpPage() {
               </picture>
             </div>
 
-            {/* Email icon */}
             <div
               className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
               style={{ backgroundColor: 'var(--accent-20)', border: '1px solid var(--accent-10)' }}
@@ -182,7 +168,6 @@ export default function VerifyOtpPage() {
             </p>
           </div>
 
-          {/* Error */}
           {error && (
             <div
               className="flex items-center gap-2 text-xs px-3 py-2.5 rounded-lg mb-5"
@@ -199,7 +184,6 @@ export default function VerifyOtpPage() {
             </div>
           )}
 
-          {/* Resent success */}
           {resent && (
             <div
               className="flex items-center gap-2 text-xs px-3 py-2.5 rounded-lg mb-5"
@@ -216,7 +200,6 @@ export default function VerifyOtpPage() {
             </div>
           )}
 
-          {/* OTP inputs */}
           <div className="flex gap-2.5 justify-center mb-6" onPaste={handlePaste}>
             {digits.map((digit, i) => (
               <input
@@ -243,7 +226,6 @@ export default function VerifyOtpPage() {
             ))}
           </div>
 
-          {/* Progress dots */}
           <div className="flex justify-center gap-1.5 mb-6">
             {digits.map((d, i) => (
               <div
@@ -258,7 +240,6 @@ export default function VerifyOtpPage() {
             ))}
           </div>
 
-          {/* Verify button */}
           <button
             onClick={() => handleVerify()}
             disabled={loading || filledCount < 6}
@@ -284,7 +265,6 @@ export default function VerifyOtpPage() {
             )}
           </button>
 
-          {/* Resend */}
           <div className="text-center mt-5">
             {countdown > 0 ? (
               <p className="text-xs" style={{ color: 'var(--text3)' }}>
@@ -305,7 +285,6 @@ export default function VerifyOtpPage() {
             )}
           </div>
 
-          {/* Back to register */}
           <p className="text-center text-xs mt-4" style={{ color: 'var(--text3)' }}>
             Wrong email?{' '}
             <Link href="/register" className="hover:underline" style={{ color: 'var(--text2)' }}>
@@ -314,7 +293,6 @@ export default function VerifyOtpPage() {
           </p>
         </div>
 
-        {/* Footer */}
         <div
           className="px-8 py-3 text-center text-xs"
           style={{
@@ -327,5 +305,19 @@ export default function VerifyOtpPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function VerifyOtpPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg)' }}>
+        <svg className="animate-spin" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ color: 'var(--accent)' }}>
+          <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+        </svg>
+      </div>
+    }>
+      <VerifyOtpInner />
+    </Suspense>
   )
 }
