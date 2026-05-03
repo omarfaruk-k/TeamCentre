@@ -8,7 +8,8 @@ import {
   Target,
   CheckSquare,
   Megaphone,
-  Users
+  Users,
+  X
 } from 'lucide-react'
 
 const navItems = [
@@ -19,19 +20,27 @@ const navItems = [
   { label: 'Members', href: '/members', icon: Users },
 ]
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen, onClose }) {
   const pathname = usePathname()
   const { active } = useWorkspaceStore()
   const accent = active?.accentColor || '#7C3AED'
 
   return (
-    <aside
-      className="w-56 shrink-0 flex flex-col h-full"
-      style={{
-        backgroundColor: 'var(--bg-panel)',
-        borderLeft: '3px solid var(--accent)',
-      }}
-    >
+    <>
+      {isOpen && (
+        <div className="fixed inset-0 bg-black/50 z-20 md:hidden" onClick={onClose} />
+      )}
+      <aside
+        className={`fixed md:relative top-0 left-0 h-full w-56 shrink-0 flex flex-col z-30 transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
+        style={{
+          backgroundColor: 'var(--bg-panel)',
+          borderLeft: '3px solid var(--accent)',
+        }}
+      >
+      <button onClick={onClose} className="absolute top-3 right-3 p-1 rounded text-[var(--text-muted)] hover:text-[var(--text)] md:hidden">
+        <X size={16} />
+      </button>
+
       {/* App name — top left */}
       <div className="px-4 h-12 flex items-center shrink-0"
         style={{ borderBottom: '1px solid var(--border)' }}>
@@ -51,6 +60,7 @@ export default function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={onClose}
               className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all"
               style={isActive ? {
                 backgroundColor: accent + '20',
@@ -84,6 +94,6 @@ onMouseLeave={e => {
       <div className="p-2 shrink-0" style={{ borderTop: '1px solid var(--border)' }}>
         <UserMenu />
       </div>
-    </aside>
+    </aside></>
   )
 }

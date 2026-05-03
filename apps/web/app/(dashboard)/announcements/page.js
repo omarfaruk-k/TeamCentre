@@ -3,6 +3,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useWorkspaceStore } from '../../../stores/workspaceStore'
 import { useAnnouncementStore } from '../../../stores/announcementStore'
 import { useAuthStore } from '../../../stores/authStore'
+import { useSearchParams } from 'next/navigation'
 
 const EMOJIS = ['👍', '❤️', '🎉', '🔥', '👀']
 
@@ -15,6 +16,20 @@ export default function AnnouncementsPage() {
   const [commentInputs, setCommentInputs] = useState({})
   const accent = workspace?.accentColor || '#7C3AED'
   const commentRefs = useRef({})
+  const [expandedComments, setExpandedComments] = useState({})
+  const toggleComments = (id) => setExpandedComments((s) => ({ ...s, [id]: !s[id] }))
+
+  const searchParams = useSearchParams()
+const highlightId = searchParams.get('id')
+
+useEffect(() => {
+  if (highlightId) {
+    setTimeout(() => {
+      const el = document.getElementById(`announcement-${highlightId}`)
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }, 500)
+  }
+}, [highlightId, announcements])
 
   useEffect(() => {
     if (workspace) fetchAnnouncements(workspace.id)
@@ -87,7 +102,7 @@ export default function AnnouncementsPage() {
         </form>
       )}
 
-      {/* Announcements list — page scrolls */}
+      {/* Announcements list */}
       <div className="flex flex-col gap-4 overflow-y-auto flex-1 pr-1">
 
         {sorted.length === 0 && (
@@ -95,33 +110,31 @@ export default function AnnouncementsPage() {
         )}
 
         {sorted.map((a) => (
-          <div
-            key={a.id}
-            className="bg-[var(--bg2)] rounded-xl border border-[var(--border)] overflow-hidden"
-          >
-            {/*
-              position: relative on this wrapper lets the right column use
-              position: absolute to always span the full card height.
-              The left column (70%) drives the card height freely.
-              The right column is pinned top-to-bottom so comments always scroll.
-            */}
-            <div style={{ position: 'relative', minHeight: '200px' }}>
+<div
+  id={`announcement-${a.id}`}
+  key={a.id}
+  className="bg-[var(--bg2)] rounded-xl border overflow-hidden transition-all"
+  style={{
+    borderColor: highlightId === a.id ? accent : 'var(--border)',
+    boxShadow: highlightId === a.id ? `0 0 0 2px ${accent}40` : 'none'
+  }}
+>
+            {/* Mobile: stacked. Desktop: side-by-side absolute layout */}
+            <div className="flex flex-col md:block md:relative" style={{ minHeight: '220px' }}>
 
-              {/* LEFT — drives card height, 70% wide with right padding for the comments panel */}
+              {/* LEFT — content panel */}
               <div
+                className="border-b border-[var(--border)] md:border-b-0 md:border-r md:border-[var(--border)] md:absolute md:top-0 md:left-0 md:bottom-0 md:w-[70%]"
                 style={{
-                  width: '70%',
-                  paddingRight: '0',
                   boxSizing: 'border-box',
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'space-between',
                   padding: '20px',
-                  borderRight: '1px solid var(--border)',
                   minHeight: '200px',
                 }}
               >
-                {/* Top group: header + content */}
+                {/* Top: header + content */}
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
                     <div>
@@ -153,50 +166,68 @@ export default function AnnouncementsPage() {
                     )}
                   </div>
 
-                  {/* Content — no scroll, card grows */}
                   <p style={{ fontSize: '13px', color: 'var(--text2)', whiteSpace: 'pre-wrap', lineHeight: '1.6', margin: 0 }}>
                     {a.content}
                   </p>
                 </div>
 
-                {/* Bottom: Reactions always pinned to bottom via justify-between */}
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '16px' }}>
-                  {EMOJIS.map((emoji) => {
-                    const count = a.reactions?.filter((r) => r.emoji === emoji).length || 0
-                    const reacted = a.reactions?.some((r) => r.emoji === emoji && r.userId === user?.id)
-                    return (
-                      <button
-                        key={emoji}
-                        onClick={() => toggleReaction(workspace.id, a.id, emoji)}
-                        style={{
-                          display: 'flex', alignItems: 'center', gap: '4px',
-                          padding: '4px 10px', borderRadius: '999px', fontSize: '13px',
-                          border: `1px solid ${reacted ? accent : 'var(--border)'}`,
-                          backgroundColor: reacted ? `${accent}20` : 'transparent',
-                          color: reacted ? accent : 'var(--text2)',
-                          cursor: 'pointer', transition: 'transform 0.1s',
-                        }}
-                        onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
-                        onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
-                        {emoji}
-                        {count > 0 && <span style={{ fontSize: '11px', fontWeight: 600 }}>{count}</span>}
-                      </button>
-                    )
-                  })}
+                {/* Bottom: reactions + mobile comment toggle */}
+                <div>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '16px' }}>
+                    {EMOJIS.map((emoji) => {
+                      const count = a.reactions?.filter((r) => r.emoji === emoji).length || 0
+                      const reacted = a.reactions?.some((r) => r.emoji === emoji && r.userId === user?.id)
+                      return (
+                        <button
+                          key={emoji}
+                          onClick={() => toggleReaction(workspace.id, a.id, emoji)}
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: '4px',
+                            padding: '4px 10px', borderRadius: '999px', fontSize: '13px',
+                            border: `1px solid ${reacted ? accent : 'var(--border)'}`,
+                            backgroundColor: reacted ? `${accent}20` : 'transparent',
+                            color: reacted ? accent : 'var(--text2)',
+                            cursor: 'pointer', transition: 'transform 0.1s',
+                          }}
+                          onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+                          onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
+                          {emoji}
+                          {count > 0 && <span style={{ fontSize: '11px', fontWeight: 600 }}>{count}</span>}
+                        </button>
+                      )
+                    })}
+                  </div>
+
+                  {/* Mobile-only comment toggle */}
+                  <button
+                    onClick={() => toggleComments(a.id)}
+                    className="md:hidden mt-3 flex items-center gap-1.5 transition-colors"
+                    style={{
+                      fontSize: '12px',
+                      color: expandedComments[a.id] ? accent : 'var(--text2)',
+                      background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                    }}>
+                    💬 {expandedComments[a.id] ? 'Hide' : 'Show'} comments
+                    {a.comments?.length > 0 && (
+                      <span style={{
+                        fontSize: '10px', fontWeight: 700,
+                        padding: '1px 6px', borderRadius: '999px',
+                        backgroundColor: `${accent}20`, color: accent,
+                      }}>
+                        {a.comments.length}
+                      </span>
+                    )}
+                  </button>
                 </div>
               </div>
 
-              {/* RIGHT — absolutely positioned, always full card height, comments scroll inside */}
+              {/* RIGHT — comments panel: always visible on desktop, toggled on mobile */}
               <div
+                className={`md:absolute md:top-0 md:right-0 md:bottom-0 md:w-[30%] md:flex ${expandedComments[a.id] ? 'flex' : 'hidden'}`}
                 style={{
-                  position: 'absolute',
-                  top: 0,
-                  right: 0,
-                  bottom: 0,
-                  width: '30%',
-                  borderLeft: '1px solid var(--border)',
-                  display: 'flex',
                   flexDirection: 'column',
+                  borderTop: '1px solid var(--border)',
+                  minHeight: '200px',
                 }}
               >
                 {/* Comments header */}
@@ -209,12 +240,12 @@ export default function AnnouncementsPage() {
                   <span style={{ fontSize: '10px', fontWeight: 600, color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     Comments
                   </span>
-                  <span style={{ fontSize: '10px', fontWeight: 600, padding: '1px 6px', borderRadius: '999px', backgroundColor: `${accent}20`, color: accent }}>
+                  <span style={{ fontSize: '10px', fontWeight: 700, padding: '1px 6px', borderRadius: '999px', backgroundColor: `${accent}20`, color: accent }}>
                     {a.comments?.length || 0}
                   </span>
                 </div>
 
-                {/* Scrollable comments — flex:1 fills the bounded height from absolute positioning */}
+                {/* Scrollable comments */}
                 <div
                   ref={(el) => (commentRefs.current[a.id] = el)}
                   style={{ flex: 1, overflowY: 'auto', padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '10px' }}
@@ -235,15 +266,15 @@ export default function AnnouncementsPage() {
                         </div>
                         <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text)' }}>{c.user?.name}</span>
                       </div>
-                      <p style={{ fontSize: '11px', color: 'var(--text2)', marginLeft: '28px', lineHeight: '1.5', margin: '0 0 0 28px' }}>
+                      <p style={{ fontSize: '11px', color: 'var(--text2)', lineHeight: '1.5', margin: '0 0 0 28px' }}>
                         {c.content}
                       </p>
                     </div>
                   ))}
                 </div>
 
-                {/* Comment input — shrink-0 always at bottom */}
-                <div style={{ padding: '8px 12px', flexShrink: 0, display: 'flex', gap: '8px' }}>
+                {/* Comment input */}
+                <div style={{ padding: '8px 12px', flexShrink: 0, display: 'flex', gap: '8px', borderTop: '1px solid var(--border)' }}>
                   <input
                     placeholder="Comment..."
                     value={commentInputs[a.id] || ''}

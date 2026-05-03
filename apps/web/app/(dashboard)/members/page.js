@@ -14,7 +14,13 @@ export default function MembersPage() {
   const accent = workspace?.accentColor || '#7C3AED'
 
   const load = () => {
-    if (workspace) api.get(`/workspaces/${workspace.id}/members`).then((r) => setMembers(r.data))
+    if (workspace) api.get(`/workspaces/${workspace.id}/members`).then((r) => {
+  const sorted = r.data.sort((a, b) => {
+    if (a.role !== b.role) return a.role === 'ADMIN' ? -1 : 1
+    return a.user.name.localeCompare(b.user.name)
+  })
+  setMembers(sorted)
+})
   }
 
   useEffect(() => { load() }, [workspace])
@@ -51,7 +57,7 @@ export default function MembersPage() {
     <div className="flex flex-col h-full">
 
       {/* Page header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-[var(--text)]">Members</h1>
           <p className="text-sm text-[var(--text2)] mt-0.5">
@@ -61,14 +67,14 @@ export default function MembersPage() {
         </div>
       </div>
 
-      <div className="flex gap-5">
+      <div className="flex flex-col md:flex-row gap-5">
 
         {/* Left — member list */}
         <div className="flex-1 min-w-0">
           <div className="bg-[var(--bg2)] rounded-xl border border-[var(--border)] overflow-hidden">
 
             {/* Table header */}
-            <div className="grid grid-cols-[1fr_auto_auto] gap-4 px-5 py-3 border-b border-[var(--border)] bg-[var(--bg)]">
+            <div className="grid grid-cols-[1fr_auto_auto] gap-4 px-3 sm:px-5 py-3 border-b border-[var(--border)] bg-[var(--bg)]">
               <span className="text-xs font-semibold text-[var(--text2)] uppercase tracking-wider">Member</span>
               <span className="text-xs font-semibold text-[var(--text2)] uppercase tracking-wider">Role</span>
               {role === 'ADMIN' && (
@@ -85,7 +91,7 @@ export default function MembersPage() {
               return (
                 <div
                   key={m.user.id}
-                  className="grid grid-cols-[1fr_auto_auto] gap-4 items-center px-5 py-3.5 border-b border-[var(--border)] last:border-0 hover:bg-[var(--bg3)] transition-colors"
+                  className="grid grid-cols-[1fr_auto_auto] gap-2 sm:gap-4 items-center px-3 sm:px-5 py-3 sm:py-3.5 border-b border-[var(--border)] last:border-0 hover:bg-[var(--bg3)] transition-colors"
                 >
                   {/* Avatar + info */}
                   <div className="flex items-center gap-3 min-w-0">
@@ -107,7 +113,7 @@ export default function MembersPage() {
                     </div>
                     <div className="min-w-0">
                       <p className="text-sm font-medium text-[var(--text)] truncate">{m.user.name}</p>
-                      <p className="text-xs text-[var(--text3)] truncate">{m.user.email}</p>
+                      <p className="text-xs text-[var(--text3)] truncate hidden sm:block">{m.user.email}</p>
                     </div>
                   </div>
 
@@ -150,8 +156,8 @@ export default function MembersPage() {
 
         {/* Right — invite panel */}
         {role === 'ADMIN' && (
-          <div className="w-72 shrink-0">
-            <div className="bg-[var(--bg2)] rounded-xl border border-[var(--border)] p-5 sticky top-0">
+          <div className="w-full md:w-72 md:shrink-0">
+            <div className="bg-[var(--bg2)] rounded-xl border border-[var(--border)] p-5 md:sticky md:top-0">
               <p className="text-sm font-semibold text-[var(--text)] mb-1">Invite a member</p>
               <p className="text-xs text-[var(--text3)] mb-4">They'll receive an email to join this workspace.</p>
 

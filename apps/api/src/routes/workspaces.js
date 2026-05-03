@@ -2,6 +2,7 @@ import { Router } from 'express'
 import prisma from '../lib/prisma.js'
 import { authenticate } from '../middleware/authenticate.js'
 import { requireRole } from '../middleware/requireRole.js'
+import { sendMail, templates } from '../lib/mailer.js'
 
 const router = Router()
 
@@ -68,6 +69,17 @@ router.post('/:workspaceId/invite', authenticate, requireRole('ADMIN'), async (r
     data: { userId: user.id, workspaceId: req.params.workspaceId, role: role || 'MEMBER' },
     include: { user: true }
   })
+
+  // send email — wrapped so it never crashes the response
+  try {
+    const inviter = await prisma.user.findUnique({ where: { id: req.user.id } })
+    const workspace = await prisma.workspace.findUnique({ where: { id: req.params.workspaceId } })
+    const t = templates.workspaceInvite(inviter.name, workspace.name)
+    await sendMail({ to: email, ...t })
+  } catch (err) {
+    console.error('Invite email failed:', err.message)
+  }
+
   res.status(201).json(member)
 })
 

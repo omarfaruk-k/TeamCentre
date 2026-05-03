@@ -34,7 +34,7 @@ export default function GoalsPage() {
     <div className="flex flex-col h-full">
 
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-[var(--text)]">Goals</h1>
           <p className="text-sm text-[var(--text2)] mt-0.5">{goals.length} goals total</p>
@@ -68,7 +68,7 @@ export default function GoalsPage() {
       </div> */}
 
       {/* Tab filter */}
-      <div className="flex gap-2 mb-5">
+      <div className="flex flex-wrap gap-2 mb-5">
         {TABS.map((t) => (
           <button
             key={t}
@@ -195,7 +195,7 @@ function GoalFormModal({ workspaceId, accent, onClose }) {
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-[var(--bg2)] rounded-xl p-6 w-full max-w-md border border-[var(--border)]">
+      <div className="bg-[var(--bg2)] rounded-xl p-4 sm:p-6 w-full max-w-md mx-4 sm:mx-0 border border-[var(--border)]">
         <h2 className="text-lg font-bold text-[var(--text)] mb-1">New Goal</h2>
         <p className="text-xs text-[var(--text3)] mb-5">Define a goal to track progress across your team.</p>
         <form onSubmit={handleSubmit} className="space-y-3">

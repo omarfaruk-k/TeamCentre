@@ -60,7 +60,7 @@ export default function ActionItemsPage() {
   return (
     <div>
 
-      <div className="flex items-center gap-4 mb-6">
+      <div className="flex flex-wrap items-center gap-3 mb-6">
   <h1 className="text-2xl font-bold text-[var(--text)]">Action Items</h1>
   <div className="flex rounded-lg border border-[var(--border)] overflow-hidden text-sm">
     <button
@@ -90,9 +90,9 @@ export default function ActionItemsPage() {
 
       {view === 'board' ? (
         <DragDropContext onDragEnd={onDragEnd}>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 md:mx-0 md:px-0 snap-x snap-mandatory md:grid md:grid-cols-3">
             {COLUMNS.map((col) => (
-              <div key={col.id} className="flex flex-col">
+              <div key={col.id} className="flex flex-col flex-none w-[280px] md:w-auto snap-start">
                 <div className="flex items-center justify-between mb-3 px-1">
                   <h2 className={`font-semibold text-xs uppercase tracking-widest ${COLUMN_HEADER_COLORS[col.id]}`}>
                     {col.label}
@@ -167,7 +167,7 @@ export default function ActionItemsPage() {
           </div>
         </DragDropContext>
       ) : (
-        <div className="bg-[var(--bg2)] rounded-xl border border-[var(--border)] overflow-hidden">
+        <div className="bg-[var(--bg2)] rounded-xl border border-[var(--border)] overflow-x-auto">
           {items.length === 0 ? (
             <div className="p-12 text-center text-[var(--text2)]">No action items yet.</div>
           ) : (
@@ -267,7 +267,7 @@ function ActionItemForm({ workspaceId, accent, onClose, onCreate }) {
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-[var(--bg2)] rounded-xl p-6 w-full max-w-md border border-[var(--border)]">
+      <div className="bg-[var(--bg2)] rounded-xl p-4 sm:p-6 w-full max-w-md mx-4 sm:mx-0 border border-[var(--border)]">
         <h2 className="text-lg font-bold text-[var(--text)] mb-4">New Action Item</h2>
         <form onSubmit={handleSubmit} className="space-y-3">
           <input

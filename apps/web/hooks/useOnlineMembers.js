@@ -10,6 +10,10 @@ export function useOnlineMembers() {
     socket.on('member:online', ({ userId }) => {
       setOnlineIds((prev) => new Set([...prev, userId]))
     })
+    
+    socket.on('members:online:init', ({ userIds }) => {
+  setOnlineIds(new Set(userIds))
+})
 
     socket.on('member:offline', ({ userId }) => {
       setOnlineIds((prev) => {

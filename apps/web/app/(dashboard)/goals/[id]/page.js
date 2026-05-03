@@ -86,7 +86,7 @@ export default function GoalDetailPage() {
       </button>
 
       {/* Header card */}
-      <div className="bg-[var(--bg2)] rounded-xl border border-[var(--border)] p-6 mb-5">
+      <div className="bg-[var(--bg2)] rounded-xl border border-[var(--border)] p-4 sm:p-6 mb-5">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
             {editing ? (
@@ -102,7 +102,7 @@ export default function GoalDetailPage() {
                   placeholder="Description..."
                   className="w-full text-sm bg-[var(--bg3)] border border-[var(--border)] rounded-lg px-3 py-2 text-[var(--text)] outline-none resize-none h-16 placeholder:text-[var(--text3)]"
                 />
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-3">
                   <select
                     value={editForm.status}
                     onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
@@ -145,7 +145,7 @@ export default function GoalDetailPage() {
                     </span>
                   )}
                 </div>
-                <h1 className="text-2xl font-bold text-[var(--text)] mb-1">{goal.title}</h1>
+                <h1 className="text-xl sm:text-2xl font-bold text-[var(--text)] mb-1">{goal.title}</h1>
                 {goal.description && (
                   <p className="text-sm text-[var(--text2)] leading-relaxed">{goal.description}</p>
                 )}
@@ -155,7 +155,7 @@ export default function GoalDetailPage() {
 
           {/* Admin actions */}
           {role === 'ADMIN' && !editing && (
-            <div className="flex gap-2 shrink-0">
+            <div className="flex gap-2 shrink-0 flex-wrap">
               <button
                 onClick={() => setEditing(true)}
                 className="text-xs px-3 py-1.5 rounded-lg border border-[var(--border)] text-[var(--text2)] hover:bg-[var(--bg3)] transition-colors">
@@ -205,10 +205,10 @@ export default function GoalDetailPage() {
       </div>
 
       {/* Bottom two columns */}
-      <div className="grid grid-cols-[1fr_380px] gap-5 flex-1 min-h-0">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-5 flex-1 min-h-0">
 
         {/* Left — milestones + activity */}
-        <div className="flex flex-col gap-5 min-h-0 overflow-y-auto pr-1">
+        <div className="flex flex-col gap-5">
 
           {/* Milestones */}
           <div className="bg-[var(--bg2)] rounded-xl border border-[var(--border)] p-5">
@@ -294,7 +294,7 @@ export default function GoalDetailPage() {
         </div>
 
         {/* Right — linked action items */}
-        <div className="bg-[var(--bg2)] rounded-xl border border-[var(--border)] p-5 flex flex-col min-h-0">
+        <div className="bg-[var(--bg2)] rounded-xl border border-[var(--border)] p-5 flex flex-col lg:min-h-0">
           <p className="text-xs font-semibold text-[var(--text2)] uppercase tracking-wider mb-4 shrink-0">
             Linked Action Items
             {goal.actionItems?.length > 0 && (

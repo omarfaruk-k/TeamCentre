@@ -5,6 +5,7 @@ import { useWorkspaceStore } from '../stores/workspaceStore'
 import { useAnnouncementStore } from '../stores/announcementStore'
 import { useActionItemStore } from '../stores/actionItemStore'
 import { useGoalStore } from '../stores/goalStore'
+import { useNotificationStore } from '../stores/notificationStore'
 
 export function useSocket() {
   const { user } = useAuthStore()
@@ -19,10 +20,16 @@ export function useSocket() {
 
     socket.connect()
     socket.emit('join:workspace', { workspaceId: workspace.id, userId: user.id })
+    socket.emit('join:user', { userId: user.id })
 
     socket.on('announcement:created', ({ announcement }) => {
       announcementStore.fetchAnnouncements(workspace.id)
     })
+
+
+socket.on('notification:new', (notif) => {
+  useNotificationStore.getState().addNotification(notif)
+})
 
     socket.on('announcement:pinned', ({ announcementId, pinned }) => {
       useAnnouncementStore.setState((s) => ({
@@ -81,6 +88,7 @@ socket.on('goal:update:added', ({ update }) => {
       socket.off('actionItem:updated')
       socket.off('goal:updated')
       socket.off('goal:update:added')
+      socket.off('notification:new')
       socket.disconnect()
     }
   }, [user, workspace?.id])

@@ -12,6 +12,8 @@ import milestoneRouter from './routes/milestones.js'
 import announcementRouter from './routes/announcements.js'
 import actionItemRouter from './routes/actionItems.js'
 import analyticsRouter from './routes/analytics.js'
+import notificationRoutes from './routes/notifications.js'
+
 
 dotenv.config()
 
@@ -26,7 +28,7 @@ initSocket(io)
 app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }))
 app.use(express.json({ limit: '10mb' }))
 app.use(cookieParser())
-
+app.use('/notifications', notificationRoutes)
 // Pass io to every request
 app.use((req, res, next) => { req.io = io; next() })
 

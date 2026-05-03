@@ -149,7 +149,7 @@ export default function DashboardPage() {
       )}
 
       {/* Charts row */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
         {/* Area chart — goal completions trend */}
         <div className="col-span-2 bg-[var(--bg2)] rounded-xl border border-[var(--border)] p-5">
@@ -325,7 +325,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Bottom row */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
         {/* Active goals with progress */}
         <div className="bg-[var(--bg2)] rounded-xl border border-[var(--border)] p-5">

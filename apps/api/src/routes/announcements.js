@@ -2,6 +2,8 @@ import { Router } from 'express'
 import prisma from '../lib/prisma.js'
 import { authenticate } from '../middleware/authenticate.js'
 import { requireRole } from '../middleware/requireRole.js'
+import { notify, parseMentions } from '../lib/notify.js'
+import { sendMail, templates } from '../lib/mailer.js'
 
 const router = Router({ mergeParams: true })
 
@@ -12,28 +14,47 @@ router.get('/', authenticate, async (req, res) => {
     include: {
       author: { select: { id: true, name: true, avatarUrl: true } },
       reactions: true,
-comments: {
-  include: { user: { select: { id: true, name: true, avatarUrl: true } } },
-  orderBy: { createdAt: 'asc' }
-}
+      comments: {
+        include: { user: { select: { id: true, name: true, avatarUrl: true } } },
+        orderBy: { createdAt: 'asc' }
+      }
     },
     orderBy: [{ pinned: 'desc' }, { createdAt: 'desc' }]
   })
   res.json(announcements)
 })
 
-// Create (admin only)
+// Create announcement (admin only)
 router.post('/', authenticate, requireRole('ADMIN'), async (req, res) => {
-const { title, content } = req.body
-if (!title || !content) return res.status(400).json({ error: 'Title and content required' })
-const announcement = await prisma.announcement.create({
-  data: { title, content, workspaceId: req.params.workspaceId, authorId: req.user.id },
+  const { title, content } = req.body
+  if (!title || !content) return res.status(400).json({ error: 'Title and content required' })
+
+  const announcement = await prisma.announcement.create({
+    data: { title, content, workspaceId: req.params.workspaceId, authorId: req.user.id },
     include: {
       author: { select: { id: true, name: true, avatarUrl: true } },
       reactions: true,
-      comments: []
+      comments: true
     }
   })
+
+  // Notify all workspace members about new announcement
+  const members = await prisma.workspaceMember.findMany({
+    where: { workspaceId: req.params.workspaceId, userId: { not: req.user.id } },
+    include: { user: { select: { id: true, email: true } } }
+  })
+  const workspace = await prisma.workspace.findUnique({ where: { id: req.params.workspaceId } })
+
+  await notify(req.io, {
+    userIds: members.map((m) => m.user.id),
+    message: `New announcement: ${announcement.title}`,
+    link: `/announcements?id=${req.params.announcementId}`
+  })
+  for (const m of members) {
+    const t = templates.newAnnouncement(announcement.title, workspace.name)
+    await sendMail({ to: m.user.email, ...t }).catch(() => {}) // silent fail if email not configured
+  }
+
   req.io.to(`workspace:${req.params.workspaceId}`).emit('announcement:created', { announcement })
   res.status(201).json(announcement)
 })
@@ -45,7 +66,10 @@ router.patch('/:announcementId/pin', authenticate, requireRole('ADMIN'), async (
     where: { id: req.params.announcementId },
     data: { pinned: !current.pinned }
   })
-  req.io.to(`workspace:${req.params.workspaceId}`).emit('announcement:pinned', { announcementId: req.params.announcementId, pinned: updated.pinned })
+  req.io.to(`workspace:${req.params.workspaceId}`).emit('announcement:pinned', {
+    announcementId: req.params.announcementId,
+    pinned: updated.pinned
+  })
   res.json(updated)
 })
 
@@ -78,12 +102,45 @@ router.post('/:announcementId/reactions', authenticate, async (req, res) => {
 router.post('/:announcementId/comments', authenticate, async (req, res) => {
   const { content } = req.body
   if (!content) return res.status(400).json({ error: 'Content required' })
-const comment = await prisma.comment.create({
-  data: { content, announcementId: req.params.announcementId, userId: req.user.id },
-  include: { user: { select: { id: true, name: true, avatarUrl: true } } }
-})
+
+  const comment = await prisma.comment.create({
+    data: { content, announcementId: req.params.announcementId, userId: req.user.id },
+    include: { user: { select: { id: true, name: true, avatarUrl: true } } }
+  })
+
+  // Handle @mentions in comment
+  const mentioned = await parseMentions(content, req.params.workspaceId)
+  for (const u of mentioned) {
+    if (u.id === req.user.id) continue // don't notify yourself
+    await notify(req.io, {
+      userIds: [u.id],
+      message: `${req.user.name} mentioned you in a comment`,
+      link: `/announcements?id=${req.params.announcementId}`
+    })
+    const t = templates.mention(req.user.name, content)
+    await sendMail({ to: u.email, ...t }).catch(() => {})
+  }
+
+  // Notify announcement author if someone else commented
+  const announcement = await prisma.announcement.findUnique({
+    where: { id: req.params.announcementId },
+    include: { author: { select: { id: true, email: true, name: true } } }
+  })
+  if (announcement.authorId !== req.user.id) {
+    await notify(req.io, {
+      userIds: [announcement.authorId],
+      message: `${req.user.name} commented on your announcement: "${announcement.title}"`,
+      link: `/announcements?id=${req.params.announcementId}`
+    })
+  }
+
+  // Emit to everyone in workspace — socket BEFORE res.json
+  req.io.to(`workspace:${req.params.workspaceId}`).emit('comment:created', {
+    announcementId: req.params.announcementId,
+    comment
+  })
+
   res.status(201).json(comment)
-  req.io.to(`workspace:${req.params.workspaceId}`).emit('comment:created', { announcementId: req.params.announcementId, comment })
 })
 
 export default router
