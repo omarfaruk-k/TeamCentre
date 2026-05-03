@@ -47,7 +47,7 @@ export default function GoalsPage() {
         </button>
       </div>
 
-      {/* Status summary cards */}
+      {/* Status summary cards
       <div className="grid grid-cols-4 gap-3 mb-6">
         {['ON_TRACK', 'AT_RISK', 'COMPLETED', 'CANCELLED'].map((s) => {
           const cfg = STATUS_CONFIG[s]
@@ -65,7 +65,7 @@ export default function GoalsPage() {
             </button>
           )
         })}
-      </div>
+      </div> */}
 
       {/* Tab filter */}
       <div className="flex gap-2 mb-5">

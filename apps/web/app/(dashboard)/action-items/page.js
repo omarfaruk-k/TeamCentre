@@ -59,33 +59,34 @@ export default function ActionItemsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-[var(--text)]">Action Items</h1>
-        <div className="flex items-center gap-2">
-          <div className="flex rounded-lg border border-[var(--border)] overflow-hidden text-sm">
-            <button
-              onClick={() => setView('board')}
-              className={`px-3 py-1.5 transition-colors ${view === 'board'
-                ? 'bg-[var(--bg3)] text-[var(--text)]'
-                : 'text-[var(--text2)] hover:bg-[var(--bg3)]'}`}>
-              Board
-            </button>
-            <button
-              onClick={() => setView('list')}
-              className={`px-3 py-1.5 transition-colors ${view === 'list'
-                ? 'bg-[var(--bg3)] text-[var(--text)]'
-                : 'text-[var(--text2)] hover:bg-[var(--bg3)]'}`}>
-              List
-            </button>
-          </div>
-          <button
-            onClick={() => setShowForm(true)}
-            className="px-4 py-2 rounded-lg text-white text-sm font-medium transition-opacity hover:opacity-90"
-            style={{ backgroundColor: accent }}>
-            + New Item
-          </button>
-        </div>
-      </div>
+
+      <div className="flex items-center gap-4 mb-6">
+  <h1 className="text-2xl font-bold text-[var(--text)]">Action Items</h1>
+  <div className="flex rounded-lg border border-[var(--border)] overflow-hidden text-sm">
+    <button
+      onClick={() => setView('board')}
+      className={`px-3 py-1.5 transition-colors ${view === 'board'
+        ? 'bg-[var(--bg3)] text-[var(--text)]'
+        : 'text-[var(--text2)] hover:bg-[var(--bg3)]'}`}>
+      Board
+    </button>
+    <button
+      onClick={() => setView('list')}
+      className={`px-3 py-1.5 transition-colors ${view === 'list'
+        ? 'bg-[var(--bg3)] text-[var(--text)]'
+        : 'text-[var(--text2)] hover:bg-[var(--bg3)]'}`}>
+      List
+    </button>
+  </div>
+  <div className="ml-auto">
+    <button
+      onClick={() => setShowForm(true)}
+      className="px-4 py-2 rounded-lg text-white text-sm font-medium transition-opacity hover:opacity-80"
+      style={{ backgroundColor: accent }}>
+      + New Item
+    </button>
+  </div>
+</div>
 
       {view === 'board' ? (
         <DragDropContext onDragEnd={onDragEnd}>
