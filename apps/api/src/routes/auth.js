@@ -5,7 +5,13 @@ import { signAccess, signRefresh, verifyAccess, verifyRefresh } from '../lib/jwt
 import { authenticate } from '../middleware/authenticate.js'
 import { sendOtpEmail } from '../lib/mailer.js'
 import crypto from 'crypto'
+import { v2 as cloudinary } from 'cloudinary'
 
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+})
  
 const router = express.Router()
  
@@ -297,15 +303,50 @@ router.get('/me', authenticate, async (req, res) => {
 // ── PATCH /auth/me ──────────────────────────────────────────
 router.patch('/me', authenticate, async (req, res) => {
   try {
-    const { name, avatarUrl } = req.body
+    const { name, avatarUrl, email } = req.body
+
+    if (email) {
+      const existing = await prisma.user.findUnique({ where: { id: req.user.id }, select: { email: true } })
+      if (email !== existing.email) {
+        const taken = await prisma.user.findUnique({ where: { email } })
+        if (taken) return res.status(409).json({ error: 'Email already in use' })
+      }
+    }
+
     const user = await prisma.user.update({
       where: { id: req.user.id },
-      data: { name, avatarUrl },
-      select: { id: true, name: true, email: true, avatarUrl: true, emailVerified: true },
+      data: {
+        ...(name && { name }),
+        ...(avatarUrl && { avatarUrl }),
+        ...(email && { email })
+      },
+      select: { id: true, name: true, email: true, avatarUrl: true }
     })
     res.json(user)
   } catch {
     res.status(500).json({ error: 'Server error' })
+  }
+})
+
+router.post('/avatar', authenticate, async (req, res) => {
+  try {
+    const { imageBase64 } = req.body
+    if (!imageBase64) return res.status(400).json({ error: 'No image provided' })
+
+    const result = await cloudinary.uploader.upload(imageBase64, {
+      folder: 'team-hub/avatars',
+      transformation: [{ width: 200, height: 200, crop: 'fill', gravity: 'face' }]
+    })
+
+    const user = await prisma.user.update({
+      where: { id: req.user.id },
+      data: { avatarUrl: result.secure_url }
+    })
+
+    res.json({ avatarUrl: user.avatarUrl })
+  } catch (err) {
+    console.error('Avatar upload error:', err)
+    res.status(500).json({ error: 'Upload failed' })
   }
 })
  
