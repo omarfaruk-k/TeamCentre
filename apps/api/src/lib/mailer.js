@@ -4,6 +4,7 @@ const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
   port: 587,
   secure: false,
+  family: 4,
   auth: {
     user: process.env.MAIL_USER,
     pass: process.env.MAIL_PASS,
@@ -12,7 +13,7 @@ const transporter = nodemailer.createTransport({
 
 // ── Base layout wrapper ─────────────────────────────────────
 const BASE_URL = process.env.CLIENT_URL || 'https://teamcentre.up.railway.app'
-const LOGO_URL = `${BASE_URL}/logo-dark.svg`
+const LOGO_URL = `${BASE_URL}/logo-light.svg`
 const ACCENT   = '#7C6EF0'
 
 const layout = (content) => `
