@@ -44,15 +44,22 @@ useEffect(() => {
 
   const handleCreate = async (e) => {
     e.preventDefault()
-    await createAnnouncement(workspace.id, form)
+    const titleVal = form.title
+    const contentVal = form.content
     setForm({ title: '', content: '' })
     setShowForm(false)
+    try {
+      await createAnnouncement(workspace.id, { title: titleVal, content: contentVal }, user)
+    } catch {
+      setShowForm(true)
+      setForm({ title: titleVal, content: contentVal })
+    }
   }
 
   const handleComment = async (announcementId) => {
     const content = commentInputs[announcementId]
     if (!content?.trim()) return
-    await addComment(workspace.id, announcementId, content)
+    await addComment(workspace.id, announcementId, content, user)
     setCommentInputs((s) => ({ ...s, [announcementId]: '' }))
   }
 

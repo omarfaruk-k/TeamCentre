@@ -9,9 +9,28 @@ export const useAnnouncementStore = create((set, get) => ({
     set({ announcements: res.data })
   },
 
-  createAnnouncement: async (workspaceId, data) => {
-    const res = await api.post(`/workspaces/${workspaceId}/announcements`, data)
-    set((s) => ({ announcements: [res.data, ...s.announcements] }))
+  createAnnouncement: async (workspaceId, data, currentUser) => {
+    const tempId = `temp-${Date.now()}`
+    const temp = {
+      id: tempId,
+      title: data.title,
+      content: data.content,
+      pinned: false,
+      reactions: [],
+      comments: [],
+      createdAt: new Date().toISOString(),
+      author: currentUser || { name: 'You' },
+    }
+    set((s) => ({ announcements: [temp, ...s.announcements] }))
+    try {
+      const res = await api.post(`/workspaces/${workspaceId}/announcements`, data)
+      set((s) => ({
+        announcements: s.announcements.map((a) => a.id === tempId ? res.data : a)
+      }))
+    } catch (err) {
+      set((s) => ({ announcements: s.announcements.filter((a) => a.id !== tempId) }))
+      throw err
+    }
   },
 
   togglePin: async (workspaceId, id) => {
@@ -52,8 +71,32 @@ export const useAnnouncementStore = create((set, get) => ({
     }
   },
 
-addComment: async (workspaceId, announcementId, content) => {
-  await api.post(`/workspaces/${workspaceId}/announcements/${announcementId}/comments`, { content })
-  
-}
+  addComment: async (workspaceId, announcementId, content, currentUser) => {
+    const prev = get().announcements
+    const tempComment = {
+      id: `temp-${Date.now()}`,
+      content,
+      createdAt: new Date().toISOString(),
+      user: currentUser || { name: 'You' },
+    }
+    set((s) => ({
+      announcements: s.announcements.map((a) =>
+        a.id === announcementId
+          ? { ...a, comments: [...(a.comments || []), tempComment] }
+          : a
+      )
+    }))
+    try {
+      const res = await api.post(`/workspaces/${workspaceId}/announcements/${announcementId}/comments`, { content })
+      set((s) => ({
+        announcements: s.announcements.map((a) =>
+          a.id === announcementId
+            ? { ...a, comments: [...a.comments.filter((c) => c.id !== tempComment.id && c.id !== res.data.id), res.data] }
+            : a
+        )
+      }))
+    } catch {
+      set({ announcements: prev })
+    }
+  }
 }))
