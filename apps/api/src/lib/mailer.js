@@ -1,16 +1,23 @@
+import nodemailer from 'nodemailer'
 
-import { Resend } from 'resend'
-
-const resend = new Resend(process.env.RESEND_API_KEY)
+const transporter = nodemailer.createTransport({
+  host: process.env.BREVO_HOST,
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.BREVO_USER,
+    pass: process.env.BREVO_PASS,
+  }
+})
 
 export const sendMail = async ({ to, subject, html }) => {
-  if (!process.env.RESEND_API_KEY) {
-    console.log('RESEND_API_KEY not set, skipping email')
+  if (!process.env.BREVO_USER) {
+    console.log('BREVO_USER not set, skipping email')
     return
   }
   console.log(`Sending email to ${to}: ${subject}`)
-  await resend.emails.send({
-    from: 'TeamCentre <onboarding@resend.dev>',
+  await transporter.sendMail({
+    from: `"TeamCentre" <${process.env.BREVO_USER}>`,
     to,
     subject,
     html,
