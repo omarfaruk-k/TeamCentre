@@ -111,17 +111,17 @@ const divider = () => `<div style="height:1px;background:#1C1B30;margin:20px 0;"
 
 
 // ── sendMail ────────────────────────────────────────────────
-export const sendMail = async ({ to, subject, html }) => {
-  if (!process.env.MAIL_USER) {
-    console.log('MAIL_USER not set, skipping email')
-    return
-  }
-  console.log(`Sending email to ${to}: ${subject}`)
-  await transporter.sendMail({
-    from: `"TeamCentre" <${process.env.MAIL_USER}>`,
-    to, subject, html
-  })
-}
+// export const sendMail = async ({ to, subject, html }) => {
+//   if (!process.env.MAIL_USER) {
+//     console.log('MAIL_USER not set, skipping email')
+//     return
+//   }
+//   console.log(`Sending email to ${to}: ${subject}`)
+//   await transporter.sendMail({
+//     from: `"TeamCentre" <${process.env.MAIL_USER}>`,
+//     to, subject, html
+//   })
+// }
 
 
 // ── OTP email ───────────────────────────────────────────────
