@@ -1,15 +1,23 @@
-import nodemailer from 'nodemailer'
 
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false,
-  family: 4,
-  auth: {
-    user: process.env.MAIL_USER,
-    pass: process.env.MAIL_PASS,
+import { Resend } from 'resend'
+
+const resend = new Resend(process.env.RESEND_API_KEY)
+
+export const sendMail = async ({ to, subject, html }) => {
+  if (!process.env.RESEND_API_KEY) {
+    console.log('RESEND_API_KEY not set, skipping email')
+    return
   }
-})
+  console.log(`Sending email to ${to}: ${subject}`)
+  await resend.emails.send({
+    from: 'TeamCentre <onboarding@resend.dev>',
+    to,
+    subject,
+    html,
+  })
+}
+
+
 
 // ── Base layout wrapper ─────────────────────────────────────
 const BASE_URL = process.env.CLIENT_URL || 'https://teamcentre.up.railway.app'
